@@ -4,6 +4,7 @@ from base64 import b64encode
 import os
 from dotenv import load_dotenv
 import time
+import json
 
 load_dotenv()
 app = create_app()
@@ -109,5 +110,8 @@ def get_summaries(query="lego", limit=200, maximum_items=20):
         all_items.extend(market_items)
 
     unique = {item["itemId"]: item for item in all_items}
+    #with open("fetch_data.txt", "w") as f:
+    #    json.dump(list(unique.values()), f, indent=2)
     return list(unique.values())
 
+#get_summaries()

@@ -7,8 +7,6 @@ from werkzeug.routing import BuildError
 def create_app():
     app = Flask(__name__)
 
-    from app import routes
-
 #    def switch_country_url(new_country):
 #        try:
 #            if not request.endpoint:
