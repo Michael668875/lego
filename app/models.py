@@ -1,7 +1,6 @@
 from app.extensions import db
 from datetime import timezone, datetime
 
-
 class TempSummaries(db.Model):
     __tablename__ = "temp_summaries"
 

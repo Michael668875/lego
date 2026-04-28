@@ -29,7 +29,7 @@ def get_token():
     resp.raise_for_status()
     return resp.json()["access_token"]
 
-def get_summaries(query="lego", limit=200, maximum_items=20):
+def get_paginated_summaries(query="lego", limit=200, maximum_items=20):
     token = get_token()
 
     marketplaces = {

@@ -27,11 +27,11 @@ def create_app():
 #
 #    app.jinja_env.globals['switch_country_url'] = switch_country_url
 #    
-
+    
     app.config.from_object("app.config.Config")
     db.init_app(app)
-    migrate.init_app(app, db)
-    
+    migrate.init_app(app, db)   
+
     app.register_blueprint(bp)
 
     return app
