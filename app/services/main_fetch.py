@@ -46,7 +46,6 @@ def main():
             # Fetch summaries
             items = get_paginated_summaries()
             save_temp_summaries(items)
-            print(app.config["SQLALCHEMY_DATABASE_URI"])
             print(f"Fetched and saved {len(items)} summaries")           
 
     except Exception:
