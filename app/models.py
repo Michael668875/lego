@@ -37,3 +37,20 @@ class TempSummaries(db.Model):
     last_updated = db.Column(db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     sold_at = db.Column(db.DateTime(timezone=True), nullable=True)
+
+class Listing(db.Model):
+    __tablename__ = "listings"
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    ebay_item_id = db.Column(db.String, unique=True, nullable=False)
+
+    title = db.Column(db.Text)
+    price = db.Column(db.Numeric(10, 2))
+    currency = db.Column(db.String(10), nullable=False)
+
+    marketplace = db.Column(db.String)
+
+    status = db.Column(db.String, default="ACTIVE", server_default="ACTIVE", index=True)
+
+    affiliate_url = db.Column(db.Text)

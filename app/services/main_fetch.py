@@ -3,7 +3,7 @@ import os
 import sys
 from app import create_app
 from app.services.save_temp import save_temp_summaries
-#from app.services.pipeline import run_pipeline, truncate_temp_tables
+from app.services.pipeline import insert_listings
 from app.services.fetch import get_paginated_summaries
 #from app.services.parse import blacklist
 from datetime import datetime
@@ -44,9 +44,11 @@ def main():
         with app.app_context():
             
             # Fetch summaries
-            items = get_paginated_summaries()
-            save_temp_summaries(items)
-            print(f"Fetched and saved {len(items)} summaries")           
+            #items = get_paginated_summaries()
+            #save_temp_summaries(items)
+            #print(f"Fetched and saved {len(items)} summaries")     
+
+            insert_listings()
 
     except Exception:
         print("Error occurred in main_fetch.py:")
