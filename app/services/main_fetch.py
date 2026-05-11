@@ -44,9 +44,9 @@ def main():
         with app.app_context():
             
             # Fetch summaries
-            #items = get_paginated_summaries()
-            #save_temp_summaries(items)
-            #print(f"Fetched and saved {len(items)} summaries")     
+            items = get_paginated_summaries()
+            save_temp_summaries(items)
+            print(f"Fetched and saved {len(items)} summaries")     
 
             insert_listings()
 

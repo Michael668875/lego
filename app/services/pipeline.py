@@ -23,7 +23,7 @@ def insert_listings():
             ts.title,
             ts.price,
             ts.currency,
-            ts.item_country,
+            ts.marketplace,
             ts.affiliate_url,
             'ACTIVE'
         FROM temp_summaries ts

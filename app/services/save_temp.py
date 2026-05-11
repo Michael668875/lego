@@ -138,6 +138,8 @@ def save_temp_summaries(items):
 
             categories=item.get("categories", []),
 
+            marketplace=item.get("marketplace_id"),
+
             item_country=location.get("country"),
             item_city=location.get("city"),
             postal_code=location.get("postalCode"),

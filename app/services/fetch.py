@@ -53,7 +53,7 @@ def get_paginated_summaries(query="lego", limit=200, maximum_items=20):
             headers = {
                 "Authorization": f"Bearer {token}",
                 "X-EBAY-C-MARKETPLACE-ID": market,
-                "X-EBAY-C-ENDUSERX": f"affiliateCampaignId={CAMPAIGN_ID}"
+                "X-EBAY-C-ENDUSERCTX": f"affiliateCampaignId={CAMPAIGN_ID}"
             }
 
             params = {

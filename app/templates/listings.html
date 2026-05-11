@@ -5,10 +5,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
 </head>
+
+
 <body>
 
-    {{listings}}
-        {{pagination}}        
+    <h1>{{ country|upper }} Listings</h1>
+
+    {% if listings %}
+    {% for listing in listings %}
+
+        <div>
+            <h2>{{ listing.title }}</h2>
+
+            <p>Price: {{ currency }}  {{ listing.price }}</p>
+            <p>Marketplace: {{ listing.marketplace }}</p>
+            <p>Status: {{ listing.status }}</p>
+
+            {% if listing.image_url %}
+                <img src="{{ listing.image_url }}" width="150">
+            {% endif %}
+
+            {% if listing.item_web_url %}
+                <p>
+                    <a href="{{ listing.item_web_url }}" target="_blank">
+                        View Listing
+                    </a>
+                </p>
+            {% endif %}
+            <hr>
+        </div>
+
+    {% endfor %}
+    {% else %}
+    <p>No listings found.</p>
+    {% endif %}
+         
         
     
 </body>

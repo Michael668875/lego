@@ -26,6 +26,8 @@ class TempSummaries(db.Model):
 
     categories = db.Column(db.JSON)
 
+    marketplace = db.Column(db.String)
+
     item_country = db.Column(db.String(2))
     item_city = db.Column(db.String(100))
     postal_code = db.Column(db.String(20))
