@@ -14,7 +14,10 @@ def insert_listings():
             title,
             price,
             currency,
+            image_urls,
+            condition,
             marketplace,
+            item_country,
             affiliate_url,
             status
         )
@@ -23,7 +26,10 @@ def insert_listings():
             ts.title,
             ts.price,
             ts.currency,
+            ts.image_urls,
+            ts.condition,
             ts.marketplace,
+            ts.item_country,
             ts.affiliate_url,
             'ACTIVE'
         FROM temp_summaries ts

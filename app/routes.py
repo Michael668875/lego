@@ -8,27 +8,20 @@ from flask import (
     make_response,
     Response
 )
-from app.models import Listing
 from app.route_helpers import *
 
 bp = Blueprint("main", __name__)
 
 @bp.route("/")
 def index():
-    return "hello this works"
+    return render_template("listings.html")
 
 @bp.route("/<country>/")
 def listings(country):
     country, marketplaces, currency = get_country_context_or_404(country)
 
-    query = (
-        Listing.query
-        .filter(
-            Listing.status == "ACTIVE",
-            Listing.marketplace.in_(marketplaces),
-        )
-    )
-
+    query = db_query(marketplaces)
+    
     # Pagination
     page = request.args.get("page", 1, type=int)
     per_page = 50
@@ -36,7 +29,7 @@ def listings(country):
     listings = pagination.items
 
     return render_template(
-        "listings.html",
+        "test_listings.html",
         listings=listings,
         pagination=pagination,
         country=country,

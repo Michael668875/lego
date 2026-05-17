@@ -1,0 +1,110 @@
+    body {
+      font-family: Inter, sans-serif;
+      padding-bottom: 80px;
+    }
+
+    section {
+      padding: 70px 0;
+    }
+
+    .section-title {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .section-subtitle {
+      color: #8b8b8b;
+      margin-bottom: 40px;
+    }
+
+    .mockup-wrapper {
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+    }
+
+    .hero-card {
+      border-radius: 20px;
+      padding: 40px;
+      margin-bottom: 30px;
+    }
+
+    .stat-card {
+      border-radius: 18px;
+      padding: 20px;
+      height: 100%;
+    }
+
+    .listing-img {
+      width: 56px;
+      height: 56px;
+      object-fit: cover;
+      border-radius: 12px;
+    }
+
+    .badge-pill {
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .table td,
+    .table th {
+      vertical-align: middle;
+    }
+
+    .menu-link {
+      text-decoration: none;
+      margin-right: 20px;
+      font-weight: 500;
+    }
+
+    .price-down {
+      color: #4ade80;
+      font-weight: 700;
+    }
+
+    .price-up {
+      color: #f87171;
+      font-weight: 700;
+    }
+
+    
+    .theme2 {
+      background: #f3f4f6;
+      color: #111827;
+    }
+
+    .theme2 .navbar-custom {
+      background: white;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .theme2 .menu-link {
+      color: #111827;
+    }
+
+    .theme2 .hero-card {
+      background: linear-gradient(135deg, #ffd500, #ffeb70);
+      color: #111827;
+    }
+
+    .theme2 .stat-card,
+    .theme2 .table-wrap {
+      background: white;
+    }
+
+    .theme2 .table {
+      color: #111827;
+    }
+
+    .theme2 .table tbody tr:hover {
+      background: #f9fafb;
+    }
+
+    .theme2 .badge-pill {
+      background: #d01012;
+      color: white;
+    }

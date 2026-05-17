@@ -1,4 +1,5 @@
 from flask import abort
+from app.models import Listing
 
 COUNTRY_FLAGS = {
     "us": "🇺🇸",
@@ -39,5 +40,11 @@ def get_country_context_or_404(country):
     """
     return get_market_context(country)
 
-
+def db_query(marketplaces):
+    return (Listing.query
+            .filter(
+                Listing.status == "ACTIVE",
+                Listing.marketplace.in_(marketplaces),
+            ))
+    
 

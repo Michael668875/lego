@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+
+<body>
+
+    <h1>{{ country|upper }} Listings</h1>
+
+    {% if listings %}
+    {% for listing in listings %}
+
+        <div>
+            <p><img src="{{ listing.image_urls[0] }}"></p>
+            <h2>{{ listing.title }}</h2>
+
+            <p>Price: {{ currency }}  {{ listing.price }}</p>
+            <p>Country: {{ listing.item_country }}</p>
+            <p>Status: {{ listing.status }}</p>
+            <p>Condition: {{ listing.condition }}</p>
+            <p><a href="{{ listing.affiliate_url }}" target=_blank>See it on eBay</a></p>            
+            <hr>
+        </div>
+
+    {% endfor %}
+    {% else %}
+    <p>No listings found.</p>
+    {% endif %}
+         
+        
+    
+</body>
+</html>

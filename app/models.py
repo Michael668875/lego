@@ -51,7 +51,11 @@ class Listing(db.Model):
     price = db.Column(db.Numeric(10, 2))
     currency = db.Column(db.String(10), nullable=False)
 
+    image_urls = db.Column(db.JSON)
+    condition = db.Column(db.String)
+
     marketplace = db.Column(db.String)
+    item_country = db.Column(db.String(2))
 
     status = db.Column(db.String, default="ACTIVE", server_default="ACTIVE", index=True)
 
