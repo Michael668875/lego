@@ -47,6 +47,8 @@ class Listing(db.Model):
 
     ebay_item_id = db.Column(db.String, unique=True, nullable=False)
 
+    set_num = db.Column(db.Integer, nullable=True)
+
     title = db.Column(db.Text)
     price = db.Column(db.Numeric(10, 2))
     currency = db.Column(db.String(10), nullable=False)
