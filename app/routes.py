@@ -70,10 +70,37 @@ def overview(country):
 def best_deals(country):
     country, marketplaces, currency = get_country_context_or_404(country)
 
-    listings = (
-        Listing.query
+    # Average price per set
+    avg_subquery = (
+        db.session.query(
+            Listing.set_num.label("set_num"),
+            func.avg(Listing.price).label("avg_price")
+        )
         .filter(Listing.marketplace.in_(marketplaces))
-        .order_by(Listing.price.asc())
+        .filter(Listing.set_num.isnot(None))
+        .filter(Listing.price.isnot(None))
+        .group_by(Listing.set_num)
+        .subquery()
+    )
+
+    # Listings 25%+ below average
+    listings = (
+        db.session.query(
+            Listing,
+            avg_subquery.c.avg_price
+        )
+        .join(
+            avg_subquery,
+            Listing.set_num == avg_subquery.c.set_num
+        )
+        .filter(Listing.marketplace.in_(marketplaces))
+        .filter(Listing.price <= avg_subquery.c.avg_price * 1)
+        .order_by(
+            (
+                (avg_subquery.c.avg_price - Listing.price)
+                / avg_subquery.c.avg_price
+            ).desc()
+        )
         .limit(100)
         .all()
     )

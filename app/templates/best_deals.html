@@ -1,5 +1,10 @@
 {% extends "layout.html" %}
 
 {% block content %}
-{{ listings }}
+
+    {% for listing, avg_price in listings %}
+        {{ listing.title }}
+        {{ ((avg_price - listing.price) / avg_price * 100)|round(1) }}%
+    {% endfor %}
+
 {% endblock %}
