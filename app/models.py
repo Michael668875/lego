@@ -1,5 +1,6 @@
 from app.extensions import db
 from datetime import timezone, datetime
+from sqlalchemy import func
 
 class TempSummaries(db.Model):
     __tablename__ = "temp_summaries"
@@ -62,3 +63,20 @@ class Listing(db.Model):
     status = db.Column(db.String, default="ACTIVE", server_default="ACTIVE", index=True)
 
     affiliate_url = db.Column(db.Text)
+
+    price_history = db.relationship(
+        "PriceHistory",
+        back_populates="listing",
+        cascade="all, delete-orphan"
+    )
+
+class PriceHistory(db.Model):
+    __tablename__ = "price_history"
+
+    id = db.Column(db.Integer, primary_key=True)
+    listing_id = db.Column(db.Integer, db.ForeignKey("listings.id", ondelete="CASCADE"))
+    price = db.Column(db.Numeric(10, 2), nullable=False)
+    currency = db.Column(db.String(10), nullable=False)
+    recorded_at = db.Column(db.DateTime(timezone=True), nullable=False, server_default=func.now(), index=True)
+
+    listing = db.relationship("Listing", back_populates="price_history")

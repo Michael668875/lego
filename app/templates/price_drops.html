@@ -1,5 +1,12 @@
 {% extends "layout.html" %}
 
 {% block content %}
-{{ listings }}
+{{ rows|length }}
+    {% for row in rows %}
+        {{ row.set_num }}<br>
+        {{ row.title }}<br>
+        {{ row.old_price }}<br>
+        {{ row.new_price }}<br>
+        {{ row.affiliate_url }}
+    {% endfor %}
 {% endblock %}

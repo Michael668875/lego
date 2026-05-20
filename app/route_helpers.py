@@ -1,5 +1,7 @@
-from flask import abort
-from app.models import Listing
+from flask import abort, request
+from sqlalchemy import func
+from app.models import Listing, PriceHistory
+from app.extensions import db
 
 COUNTRY_FLAGS = {
     "us": "🇺🇸",
@@ -47,4 +49,150 @@ def db_query(marketplaces):
                 Listing.marketplace.in_(marketplaces),
             ))
     
+#overview logic
+def db_overview(marketplaces):
+    return (
+        db.session.query(
+            Listing.set_num,
+            func.count(Listing.id).label("count")
+        )
+        .filter(Listing.marketplace.in_(marketplaces))
+        .filter(Listing.set_num.isnot(None))
+        .group_by(Listing.set_num)
+        .order_by(func.count(Listing.id).desc())
+        #.all()
+    )
 
+# best deals logic
+def db_bestdeals(marketplaces):
+    return (
+        db.session.query(
+            Listing.set_num.label("set_num"),
+            func.avg(Listing.price).label("avg_price")
+        )
+        .filter(Listing.marketplace.in_(marketplaces))
+        .filter(Listing.set_num.isnot(None))
+        .filter(Listing.price.isnot(None))
+        .filter(Listing.status == "ACTIVE")
+        .group_by(Listing.set_num)
+        .subquery()
+    )
+
+# Listings 25%+ below average
+def bestdeals_listings(marketplaces):
+    avg_subquery = db_bestdeals(marketplaces)
+    return (
+        db.session.query(
+            Listing,
+            avg_subquery.c.avg_price
+        )
+        .join(
+            avg_subquery,
+            Listing.set_num == avg_subquery.c.set_num
+        )
+        .filter(Listing.marketplace.in_(marketplaces))
+        .filter(Listing.status == "ACTIVE")
+        .filter(Listing.price <= avg_subquery.c.avg_price * 1) #1 for debugging. set to 0.75 later
+        .order_by(
+            (
+                (avg_subquery.c.avg_price - Listing.price)
+                / avg_subquery.c.avg_price
+            ).desc()
+        )
+        .limit(100)
+        .all()
+    )
+
+
+# price drops logic
+def old_price_query():
+    return func.lag(PriceHistory.price).over(
+        partition_by=PriceHistory.listing_id,
+        order_by=(PriceHistory.recorded_at, PriceHistory.id)
+    )
+
+def changes_query(marketplaces):
+    old_price = old_price_query()
+    return (
+            db.session.query(
+                PriceHistory.listing_id.label("listing_id"),
+
+                Listing.set_num.label("set_num"),
+                Listing.title.label("title"),
+
+                Listing.ebay_item_id.label("ebay_item_id"),
+                Listing.affiliate_url.label("affiliate_url"),
+
+                PriceHistory.price.label("new_price"),
+                old_price.label("old_price"),
+
+                Listing.currency.label("currency"),
+            )
+            .join(Listing, Listing.id == PriceHistory.listing_id)
+            .filter(
+                Listing.status == "ACTIVE",
+                Listing.marketplace.in_(marketplaces),
+                Listing.set_num.isnot(None),
+            )
+            .subquery()
+        )
+
+def drops_query(marketplaces):
+
+    price_changes_subq = changes_query(marketplaces)
+
+    return (
+        db.session.query(
+            price_changes_subq.c.set_num,
+            price_changes_subq.c.title,
+
+            price_changes_subq.c.ebay_item_id,
+
+            price_changes_subq.c.old_price,
+            price_changes_subq.c.new_price,
+
+            (
+                price_changes_subq.c.old_price
+                - price_changes_subq.c.new_price
+            ).label("drop_amount"),
+
+            (
+                (
+                    price_changes_subq.c.old_price
+                    - price_changes_subq.c.new_price
+                )
+                / price_changes_subq.c.old_price * 100
+            ).label("discount_percent"),
+
+            price_changes_subq.c.currency,
+            price_changes_subq.c.affiliate_url,
+        )
+        # remove filter for debuggin. restore later
+        #.filter( 
+        #    price_changes_subq.c.old_price.isnot(None),
+        #    price_changes_subq.c.new_price < price_changes_subq.c.old_price,
+        #)
+        .all()
+    )
+
+# models logic
+def model_query(marketplaces):
+    return (
+        db.session.query(
+            Listing.set_num,
+            func.min(Listing.price).label("min_price"),
+            func.count(Listing.id).label("count"),
+        )
+        .filter(Listing.marketplace.in_(marketplaces))
+        .filter(Listing.set_num.isnot(None))
+        .group_by(Listing.set_num)
+        .order_by(func.count(Listing.id).desc())
+        .all()
+    )
+
+# Pagination
+def page_nums(query, pages = 50):
+    page = request.args.get("page", 1, type=int)
+    per_page = pages  
+    pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+    return pagination.items

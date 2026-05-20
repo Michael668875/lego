@@ -45,7 +45,35 @@ def insert_listings():
         )
         ON CONFLICT (ebay_item_id) DO NOTHING;                            
                             """))
-    db.session.commit()
+
+# create data for price_history table
+def insert_price_history():
+    """
+    Append a price_history row only when the current listing price differs
+    from the most recent recorded price (or if no history exists yet),
+    limited to listings present in the current scrape.
+    """
+    db.session.execute(text(r"""
+        INSERT INTO price_history (listing_id, price, currency)
+        SELECT
+            l.id,
+            l.price,
+            l.currency
+        FROM listings l
+        JOIN temp_summaries ts
+          ON ts.ebay_item_id = l.ebay_item_id
+        LEFT JOIN LATERAL (
+            SELECT ph.price, ph.currency
+            FROM price_history ph
+            WHERE ph.listing_id = l.id
+            ORDER BY ph.recorded_at DESC, ph.id DESC
+            LIMIT 1
+        ) last_ph ON TRUE
+        WHERE last_ph.price IS NULL
+           OR last_ph.price <> l.price
+           OR last_ph.currency <> l.currency;
+    """))
+
 
 
 def find_set_number(title):
@@ -97,8 +125,11 @@ def get_set_nums():
         if set_num:
             listing.set_num = set_num
 
-    db.session.commit()
     
-with app.app_context():
+
+def run_pipeline():
     insert_listings()
     get_set_nums()
+    insert_price_history()
+
+    db.session.commit()

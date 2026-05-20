@@ -1,0 +1,130 @@
+
+
+{% macro navigation() %}
+<nav class="navbar navbar-expand-lg navbar-custom px-4 py-3">
+          <div class="container-fluid">
+            <span class="navbar-brand fw-bold fs-4 text-danger">
+              BrickMarket
+            </span>
+
+            <div>
+              <a class="menu-link" href="#">Home</a>
+              <a class="menu-link" href="#">Overview</a>
+              <a class="menu-link" href="#">Best Deals</a>
+              <a class="menu-link" href="#">Price Drops</a>
+              <a class="menu-link" href="#">Available Models</a>
+            </div>
+          </div>
+        </nav>
+{% endmacro %}
+
+{% macro hero() %}
+<div class="hero-card mb-4">
+            <div class="row align-items-center">
+              <div class="col-lg-7">
+                <div class="badge-pill mb-3">
+                  TOP LEGO DEALS DAILY
+                </div>
+
+                <h1 class="display-4 fw-bold mb-3">
+                  Find your next LEGO set.
+                </h1>
+
+                <p class="fs-5 mb-4">
+                  Browse thousands of listings with pricing insights and collector trends.
+                </p>
+
+                <button class="btn btn-dark btn-lg">
+                  Browse Sets
+                </button>
+              </div>
+
+              <div class="col-lg-5 mt-4 mt-lg-0">
+                <img class="img-fluid rounded-4"
+                  src="https://images.unsplash.com/photo-1587654780291-39c9404d746b?q=80&w=800&auto=format&fit=crop">
+              </div>
+            </div>
+          </div>
+{% endmacro %}
+
+{% macro specials() %}
+          <div class="row g-4 mb-4">
+            <div class="col-md-4">
+              <div class="stat-card shadow-sm p-4">
+                <div class="text-secondary mb-2">New Listings</div>
+                <div class="display-6 fw-bold">1,289</div>
+              </div>
+            </div>
+
+            <div class="col-md-4">
+              <div class="stat-card shadow-sm p-4">
+                <div class="text-secondary mb-2">Trending Theme</div>
+                <div class="display-6 fw-bold">Star Wars</div>
+              </div>
+            </div>
+
+            <div class="col-md-4">
+              <div class="stat-card shadow-sm p-4">
+                <div class="text-secondary mb-2">Average Deal</div>
+                <div class="display-6 fw-bold">15% Off</div>
+              </div>
+            </div>
+          </div>
+
+{% endmacro %}
+
+{% macro listing_table() %}
+<div class="table-wrap rounded-4 shadow-sm p-4">
+    <h3 class="mb-4">Popular Listings</h3>
+
+    <div class="table-responsive">
+        <table class="table align-middle">
+        <thead>
+            <tr>
+            <th>Set</th>
+            <th>Condition</th>
+            <th>Price</th>
+            <th>Availability</th>
+            <th>Status</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            <tr>
+            <td>
+                <div class="d-flex align-items-center gap-3">
+                <img class="listing-img"
+                    src="https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?q=80&w=400&auto=format&fit=crop">
+                <div>
+                    <div class="fw-semibold">Daily Bugle</div>
+                    <small class="text-secondary">76178</small>
+                </div>
+                </div>
+            </td>
+            <td>New</td>
+            <td>$470</td>
+            <td>32 Listings</td>
+            <td><span class="badge bg-success">Hot Deal</span></td>
+            </tr>
+
+            <tr>
+            <td>
+                <div class="d-flex align-items-center gap-3">
+                <img class="listing-img"
+                    src="https://images.unsplash.com/photo-1585366119957-e9730b6d0f60?q=80&w=400&auto=format&fit=crop">
+                <div>
+                    <div class="fw-semibold">Hogwarts Express</div>
+                    <small class="text-secondary">76405</small>
+                </div>
+                </div>
+            </td>
+            <td>Used</td>
+            <td>$399</td>
+            <td>12 Listings</td>
+            <td><span class="badge bg-warning text-dark">Price Drop</span></td>
+            </tr>
+        </tbody>
+        </table>
+    </div>
+</div>
+{% endmacro %}
