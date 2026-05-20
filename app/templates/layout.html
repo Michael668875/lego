@@ -19,7 +19,19 @@
     </p>
   </div>
 
-  {% block content %}{% endblock %}
+  <section class="theme2">
+    <div class="container">
+      {{ macro.titles() }}
 
+      <div class="mockup-wrapper">
+
+        {{ macro.navigation(country) }}
+
+        <div class="p-4 p-lg-5">
+  {% block content %}{% endblock %}
+          </div>
+          </div>
+    </div>
+  </section>
 </body>
 </html>

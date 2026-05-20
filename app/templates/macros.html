@@ -1,18 +1,24 @@
 
+{% macro titles() %}
+<div class="section-title">2. Brick Marketplace</div>
+      <div class="section-subtitle">
+        Bright and approachable marketplace styling with strong visual browsing.
+      </div>
+{% endmacro %}
 
-{% macro navigation() %}
+{% macro navigation(country) %}
 <nav class="navbar navbar-expand-lg navbar-custom px-4 py-3">
           <div class="container-fluid">
             <span class="navbar-brand fw-bold fs-4 text-danger">
-              BrickMarket
+              BrickDrops
             </span>
 
             <div>
-              <a class="menu-link" href="#">Home</a>
-              <a class="menu-link" href="#">Overview</a>
-              <a class="menu-link" href="#">Best Deals</a>
-              <a class="menu-link" href="#">Price Drops</a>
-              <a class="menu-link" href="#">Available Models</a>
+              <a class="menu-link" href="{{ url_for('main.listings', country=country) }}">Home</a>
+              <a class="menu-link" href="{{ url_for('main.overview', country=country) }}">Overview</a>
+              <a class="menu-link" href="{{ url_for('main.best_deals', country=country) }}">Best Deals</a>
+              <a class="menu-link" href="{{ url_for('main.price_drops', country=country) }}">Price Drops</a>
+              <a class="menu-link" href="{{ url_for('main.models', country=country) }}">Available Models</a>
             </div>
           </div>
         </nav>

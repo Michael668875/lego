@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template 
+from flask import Blueprint, render_template, redirect, url_for
 
 from app.route_helpers import *
 
@@ -7,7 +7,15 @@ bp = Blueprint("main", __name__)
 
 @bp.route("/")
 def index():
-    return render_template("listings.html")
+    preferred = request.cookies.get("preferred_country")
+    valid_countries = set(get_enabled_markets().keys())
+
+    if preferred:
+        preferred = preferred.lower()
+        if preferred in valid_countries:
+            return redirect(url_for("main.listings", country=preferred))
+
+    return redirect(url_for("main.listings", country="us"))
 
 @bp.route("/<country>/")
 def listings(country):

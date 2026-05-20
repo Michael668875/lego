@@ -1,13 +1,16 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
+{% extends "layout.html" %}
+{% import "macros.html" as macro %}
 
 
-<body>
+{% block content %}
+
+
+            {{ macro.hero() }}
+
+            {{ macro.specials() }}
+
+            {{ macro.listing_table() }}
+
 
     <h1>{{ country|upper }} Listings</h1>
 
@@ -31,7 +34,5 @@
     <p>No listings found.</p>
     {% endif %}
          
-        
-    
-</body>
-</html>
+
+{% endblock %}
