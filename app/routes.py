@@ -26,7 +26,7 @@ def listings(country):
     listings = page_nums(query)
 
     return render_template(
-        "test_listings.html",
+        "listings.html",
         listings=listings,
         country=country,
         currency=currency,

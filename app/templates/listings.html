@@ -1,28 +1,13 @@
 {% extends "layout.html" %}
 {% import "macros.html" as macro %}
 
+
 {% block content %}
-<section class="theme2">
-    <div class="container">
-      <div class="section-title">2. Brick Marketplace</div>
-      <div class="section-subtitle">
-        Bright and approachable marketplace styling with strong visual browsing.
-      </div>
 
-      <div class="mockup-wrapper">
+            {{ macro.hero() }}
 
-        {{ macro.navigation(country) }}
+            {{ macro.specials() }}
 
-        <div class="p-4 p-lg-5">
+            {{ macro.listing_table(listings, currency) }}         
 
-          {{ macro.hero() }}
-
-          {{ macro.specials() }}
-
-          {{ macro.listing_table() }}
-
-        </div>
-      </div>
-    </div>
-  </section>
 {% endblock %}

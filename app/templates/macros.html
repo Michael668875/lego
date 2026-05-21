@@ -79,7 +79,7 @@
 
 {% endmacro %}
 
-{% macro listing_table() %}
+{% macro listing_table(listings, currency) %}
 <div class="table-wrap rounded-4 shadow-sm p-4">
     <h3 class="mb-4">Popular Listings</h3>
 
@@ -90,45 +90,34 @@
             <th>Set</th>
             <th>Condition</th>
             <th>Price</th>
-            <th>Availability</th>
-            <th>Status</th>
+            <th>Url</th>
             </tr>
         </thead>
 
         <tbody>
+          {% if listings %}
+          {% for listing in listings %}
             <tr>
             <td>
                 <div class="d-flex align-items-center gap-3">
                 <img class="listing-img"
-                    src="https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?q=80&w=400&auto=format&fit=crop">
+                    src="{{ listing.image_urls[0] }}">
                 <div>
-                    <div class="fw-semibold">Daily Bugle</div>
-                    <small class="text-secondary">76178</small>
+                    <div class="fw-semibold">{{ listing.title }}</div>
+                    <small class="text-secondary">{{ listing.set_num if listing.set_num else "-" }}</small>
                 </div>
                 </div>
             </td>
-            <td>New</td>
-            <td>$470</td>
-            <td>32 Listings</td>
-            <td><span class="badge bg-success">Hot Deal</span></td>
+            <td>{{ listing.condition }}</td>
+            <td>{{ currency }}  ${{ listing.price }}</td>
+            <td><a href="{{ listing.affiliate_url }}" target="_blank">See it on eBay</a></a></td>
             </tr>
-
+          {% endfor %}
+          {% else %}
             <tr>
-            <td>
-                <div class="d-flex align-items-center gap-3">
-                <img class="listing-img"
-                    src="https://images.unsplash.com/photo-1585366119957-e9730b6d0f60?q=80&w=400&auto=format&fit=crop">
-                <div>
-                    <div class="fw-semibold">Hogwarts Express</div>
-                    <small class="text-secondary">76405</small>
-                </div>
-                </div>
-            </td>
-            <td>Used</td>
-            <td>$399</td>
-            <td>12 Listings</td>
-            <td><span class="badge bg-warning text-dark">Price Drop</span></td>
+                <td colspan="5">No listings found.</td>
             </tr>
+          {% endif %}
         </tbody>
         </table>
     </div>
