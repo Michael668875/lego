@@ -110,7 +110,44 @@
             </td>
             <td>{{ listing.condition }}</td>
             <td>{{ currency }}  ${{ listing.price }}</td>
-            <td><a href="{{ listing.affiliate_url }}" target="_blank">See it on eBay</a></a></td>
+            <td><a href="{{ listing.affiliate_url }}" target="_blank">See it on eBay</a></td>
+            </tr>
+          {% endfor %}
+          {% else %}
+            <tr>
+                <td colspan="5">No listings found.</td>
+            </tr>
+          {% endif %}
+        </tbody>
+        </table>
+    </div>
+</div>
+{% endmacro %}
+
+
+{% macro overview_table(results, currency) %}
+<div class="table-wrap rounded-4 shadow-sm p-4">
+    <h3 class="mb-4">Overview</h3>
+
+    <div class="table-responsive">
+        <table class="table align-middle">
+        <thead>
+            <tr>
+            <th>Set</th>
+            <th>Starting From</th>
+            <th>Number of Listings</th>
+            </tr>
+        </thead>
+
+        <tbody>
+          {% if results %}
+          {% for result in results %}
+            <tr>
+            <td>
+                <div class="fw-semibold">{{ result.set_num if result.set_num else "-" }}</div>
+            </td>
+            <td>{{ currency }}  ${{ result.Listing.price }}</td>
+            <td>{{ result.count }}</td>
             </tr>
           {% endfor %}
           {% else %}

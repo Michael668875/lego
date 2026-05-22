@@ -51,17 +51,38 @@ def db_query(marketplaces):
     
 #overview logic
 def db_overview(marketplaces):
-    return (
+
+    base_q = (
         db.session.query(
-            Listing.set_num,
+            Listing.set_num.label("set_num"),
             func.count(Listing.id).label("count")
         )
         .filter(Listing.marketplace.in_(marketplaces))
         .filter(Listing.set_num.isnot(None))
         .group_by(Listing.set_num)
-        .order_by(func.count(Listing.id).desc())
-        #.all()
+        .subquery()
     )
+
+    cheapest_listing_subq = (
+        db.session.query(Listing.id)
+        .filter(Listing.set_num == base_q.c.set_num)
+        .filter(Listing.marketplace.in_(marketplaces))
+        .order_by(Listing.price.asc())
+        .limit(1)
+        .correlate(base_q)
+        .scalar_subquery()
+    )
+
+    return (
+        db.session.query(
+            base_q.c.set_num,
+            base_q.c.count,
+            Listing
+        )
+        .join(Listing, Listing.id == cheapest_listing_subq)
+        .order_by(base_q.c.count.desc())
+    )
+
 
 # best deals logic
 def db_bestdeals(marketplaces):

@@ -43,8 +43,8 @@ def overview(country):
 
     return render_template(
         "overview.html",
-        country=country,
         results=results,
+        country=country,
         currency=currency,
         country_flags=COUNTRY_FLAGS,
     )
