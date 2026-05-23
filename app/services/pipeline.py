@@ -20,6 +20,7 @@ def insert_listings():
             marketplace,
             item_country,
             affiliate_url,
+            last_seen,
             status
         )
         SELECT
@@ -32,6 +33,7 @@ def insert_listings():
             ts.marketplace,
             ts.item_country,
             ts.affiliate_url,
+            ts.last_seen,
             'ACTIVE'
         FROM temp_summaries ts
         WHERE EXISTS (

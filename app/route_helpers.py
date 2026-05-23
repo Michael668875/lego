@@ -3,6 +3,10 @@ from sqlalchemy import func
 from app.models import Listing, PriceHistory
 from app.extensions import db
 
+
+
+
+
 COUNTRY_FLAGS = {
     "us": "🇺🇸",
     "au": "🇦🇺",
@@ -201,10 +205,13 @@ def model_query(marketplaces):
     return (
         db.session.query(
             Listing.set_num,
-            func.min(Listing.price).label("min_price"),
             func.count(Listing.id).label("count"),
+            func.max(Listing.last_seen).label("last_seen"),
         )
-        .filter(Listing.marketplace.in_(marketplaces))
+        .filter(
+            Listing.status == "ACTIVE",
+            Listing.marketplace.in_(marketplaces)
+        )
         .filter(Listing.set_num.isnot(None))
         .group_by(Listing.set_num)
         .order_by(func.count(Listing.id).desc())

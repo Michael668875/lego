@@ -64,6 +64,8 @@ class Listing(db.Model):
 
     affiliate_url = db.Column(db.Text)
 
+    last_seen = db.Column(db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+
     price_history = db.relationship(
         "PriceHistory",
         back_populates="listing",

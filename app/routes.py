@@ -1,9 +1,36 @@
 from flask import Blueprint, render_template, redirect, url_for
-
+from datetime import datetime, timezone
 from app.route_helpers import *
 
 
 bp = Blueprint("main", __name__)
+
+@bp.app_template_filter("timeago")
+def timeago(dt):
+    if not dt:
+        return ""
+
+    # If datetime is naive, assume UTC
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+
+    now = datetime.now(timezone.utc).astimezone(dt.tzinfo)
+    diff = now - dt
+    seconds = int(diff.total_seconds())
+
+    if seconds < 60:
+        return "just now"
+    elif seconds < 3600:
+        minutes = seconds // 60
+        return f"{minutes} min ago"
+    elif seconds < 86400:
+        hours = seconds // 3600
+        return f"{hours} hr ago"
+    elif seconds < 604800:
+        days = seconds // 86400
+        return f"{days} day{'s' if days != 1 else ''} ago"
+    else:
+        return dt.strftime("%d %b %Y")
 
 @bp.route("/")
 def index():

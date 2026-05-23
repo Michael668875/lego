@@ -1,4 +1,6 @@
 
+{% import "macro_helpers.html" as helpers %}
+
 {% macro titles() %}
 <div class="section-title">2. Brick Marketplace</div>
       <div class="section-subtitle">
@@ -159,4 +161,105 @@
         </table>
     </div>
 </div>
+{% endmacro %}
+
+
+{% macro best_deals_table(listings, currency) %}
+<div class="table-wrap rounded-4 shadow-sm p-4">
+    <h3 class="mb-4">Best Deals</h3>
+
+    <div class="table-responsive">
+        <table class="table align-middle">
+        <thead>
+            <tr>
+            <th>Set</th>
+            <th>Price</th>
+            <th>Market Average</th>
+            <th>Discount</th>
+            <th>Listing</th>
+            </tr>
+        </thead>
+
+        <tbody>
+          {% if listings %}
+          {% for listing in listings %}
+            <tr>
+            <td>
+                <div class="fw-semibold">{{ listing.Listing.set_num if listing.Listing.set_num else "-" }}</div>
+            </td>
+            <td>{{ currency }}  {{ helpers.price_display(listing.Listing.price, currency, show_code=False) }}</td>
+            <td>{{ helpers.price_display(listing.avg_price, currency, show_code=False) }}</td>
+            <td>{{ ((listing.avg_price - listing.Listing.price) / listing.avg_price * 100)|round(1) }}%</td>
+            <td><a href="{{ listing.affiliate_url }}" target="_blank">See it on eBay</a></td>
+            </tr>
+          {% endfor %}
+          {% else %}
+            <tr>
+                <td colspan="5">No listings found.</td>
+            </tr>
+          {% endif %}
+        </tbody>
+        </table>
+    </div>
+</div>
+{% endmacro %}
+
+
+{% macro price_drops_table(rows, currency) %}
+<div class="table-wrap rounded-4 shadow-sm p-4">
+    <h3 class="mb-4">Price Drops</h3>
+
+    <div class="table-responsive">
+        <table class="table align-middle">
+        <thead>
+            <tr>
+            <th>Set</th>
+            <th>Old Price</th>
+            <th>New Price</th>
+            <th>Discount</th>
+            <th>Listing</th>
+            </tr>
+        </thead>
+
+        <tbody>
+          {% if rows %}
+          {% for row in rows %}
+            <tr>
+            <td>
+                <div class="fw-semibold">{{ row.set_num if row.set_num else "-" }}</div>
+            </td>
+            <td>{{ row.old_price }}</td>
+            <td>{{ row.new_price }}</td>
+            <td>{{ row.discount_percent|round(0)|int if row.discount_percent else "0" }}%</td>
+            <td><a href="{{ row.affiliate_url }}" target="_blank">See it on eBay</a></td>
+            </tr>
+          {% endfor %}
+          {% else %}
+            <tr>
+                <td colspan="5">No listings found.</td>
+            </tr>
+          {% endif %}
+        </tbody>
+        </table>
+    </div>
+</div>
+{% endmacro %}
+
+
+{% macro models_table(models, country) %}
+
+  {% if models %}
+  {% for model in models %}
+        
+        <div class="model-grid">
+            <div class="model-chip">{{ model.set_num }} 
+              {% if model.last_seen %}
+                <small class="model-last-seen">Seen {{ model.last_seen|timeago }}</small>
+              {% else %}
+                <small class="model-last-seen">Not Seen</small>
+              {% endif %}
+            </div>
+        </div>
+  {% endfor %}
+  {% endif %}
 {% endmacro %}

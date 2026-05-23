@@ -1,0 +1,13 @@
+
+{% macro price_display(price, currency, show_code=True) %}
+    {% set symbols = {'USD':'$', 'AUD':'$', 'EUR':'€', 'GBP':'£'} %}
+    {% set code = (currency or '').upper() %}
+    {% set symbol = symbols.get(code, '') %}
+
+    <span class="price-heading-wrap">
+        <span>{{ symbol }}{{ '%.2f'|format(price) }}</span>
+        {% if show_code and code %}
+            <span class="price-heading-code">{{ code }}</span>
+        {% endif %}
+    </span>
+{% endmacro %}
