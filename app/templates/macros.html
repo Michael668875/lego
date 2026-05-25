@@ -1,5 +1,28 @@
 
 {% import "macro_helpers.html" as helpers %}
+{% set nav_country = country if country is defined and country else 'us' %}
+
+{% macro country_select(country, country_flags) %}
+  {% set nav_country = country if country else 'us' %}
+<!-- Country Dropdown -->
+      <div class="dropdown">
+        <button class="btn btn-sm dropdown-toggle country-btn" type="button" id="countryDropdown"
+                data-bs-toggle="dropdown" aria-expanded="false">
+          {{ country_flags.get(nav_country) }}
+          {{ nav_country.upper() }}
+        </button>
+
+        <ul class="dropdown-menu" aria-labelledby="countryDropdown">
+          {% for code, flag in country_flags.items() %}
+            <li>
+              <a class="dropdown-item" href="{{ switch_country_url(code) }}">
+                {{ flag }} {{ code.upper() }}
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+{% endmacro %}
 
 {% macro titles() %}
 <div class="section-title">2. Brick Marketplace</div>
@@ -8,14 +31,15 @@
       </div>
 {% endmacro %}
 
-{% macro navigation(country) %}
+{% macro navigation(country, country_flags) %}
 <nav class="navbar navbar-expand-lg navbar-custom px-4 py-3">
-          <div class="container-fluid">
+          <div class="container-fluid d-flex align-items-center">
             <span class="navbar-brand fw-bold fs-4 text-danger">
               BrickDrops
             </span>
+            <div class="ms-3">{{ country_select(country, country_flags) }}</div>
 
-            <div>
+            <div class="ms-auto">
               <a class="menu-link" href="{{ url_for('main.listings', country=country) }}">Home</a>
               <a class="menu-link" href="{{ url_for('main.overview', country=country) }}">Overview</a>
               <a class="menu-link" href="{{ url_for('main.best_deals', country=country) }}">Best Deals</a>
@@ -261,5 +285,9 @@
             </div>
         </div>
   {% endfor %}
+  {% else %}
+            <tr>
+                <td colspan="5">No models found.</td>
+            </tr>
   {% endif %}
 {% endmacro %}

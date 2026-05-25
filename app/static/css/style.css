@@ -4,7 +4,7 @@
     }
 
     section {
-      padding: 70px 0;
+      padding: 20px 0;
     }
 
     .section-title {
@@ -124,9 +124,9 @@
   justify-content: center;
   min-height: 72px;
   padding: 0.75rem 0.9rem;
-  border: 1px solid #e2e2e2;
+  border: 2px solid #f81b0f;
   border-radius: 12px;
-  background: #d9d0d0;
+  background: #ffffff;
   text-decoration: none;
   color: inherit;
   transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
@@ -135,7 +135,8 @@
 .model-chip:hover {
   text-decoration: none;
   color: inherit;
-  border-color: #fe6a6a;
+  border-color: #3b5af5;
+  background: #c6d6f8;
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
   transform: translateY(-1px);
 }
@@ -189,3 +190,25 @@
     font-size: 1.1rem;
   }
 }
+
+/* styling for country select */
+
+.country-btn {
+    background-color: white;
+    color: #656565;
+    border: 2px solid;
+    border-color: #b71c1c;
+}
+
+.country-btn:hover {
+    background-color: #b71c1c;
+    color: white;
+}
+
+.country-btn:focus,
+.country-btn:active {
+    background-color: white !important;
+    color: #656565 !important;
+    box-shadow: none;
+}
+

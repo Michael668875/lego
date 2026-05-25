@@ -12,20 +12,14 @@
   </head>
 <body>
 
-  <div class="container py-5">
-    <h1 class="display-4 fw-bold mb-3">LEGO Site Theme Mockups</h1>
-    <p class="lead text-secondary">
-      Three possible visual directions for your LEGO pricing and tracking site.
-    </p>
-  </div>
+ 
 
   <section class="theme2">
     <div class="container">
-      {{ macro.titles() }}
 
       <div class="mockup-wrapper">
 
-        {{ macro.navigation(country) }}
+        {{ macro.navigation(country, country_flags) }}
 
         <div class="p-4 p-lg-5">
   {% block content %}{% endblock %}
@@ -33,5 +27,6 @@
           </div>
     </div>
   </section>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

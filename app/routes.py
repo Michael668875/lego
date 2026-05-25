@@ -5,6 +5,15 @@ from app.route_helpers import *
 
 bp = Blueprint("main", __name__)
 
+@bp.app_errorhandler(404)
+def not_found_error(error):
+    return render_template("404.html"), 404
+
+@bp.app_errorhandler(500)
+def internal_error(error):
+    db.session.rollback()
+    return render_template("500.html"), 500
+
 @bp.app_template_filter("timeago")
 def timeago(dt):
     if not dt:
@@ -31,10 +40,38 @@ def timeago(dt):
         return f"{days} day{'s' if days != 1 else ''} ago"
     else:
         return dt.strftime("%d %b %Y")
+    
+DEFAULT_COUNTRY = "us"
+
+@bp.app_context_processor
+def inject_site_globals():
+    country = request.view_args.get("country") if request.view_args else None
+
+    if not country:
+        country = request.cookies.get("country", DEFAULT_COUNTRY)
+
+    country = (country or DEFAULT_COUNTRY).lower()
+
+    currency = CURRENCY_BY_COUNTRY.get(country, "USD")
+
+    return {
+        "country": country,
+        "country_flags": COUNTRY_FLAGS,
+        "currency": currency,
+    }
+
+
+@bp.after_app_request
+def persist_country_cookie(response):
+    if request.view_args and "country" in request.view_args:
+        country = request.view_args["country"].lower()
+        response.set_cookie("country", country, max_age=60 * 60 * 24 * 365)
+    return response
+
 
 @bp.route("/")
 def index():
-    preferred = request.cookies.get("preferred_country")
+    preferred = request.cookies.get("country")
     valid_countries = set(get_enabled_markets().keys())
 
     if preferred:
@@ -55,9 +92,6 @@ def listings(country):
     return render_template(
         "listings.html",
         listings=listings,
-        country=country,
-        currency=currency,
-        country_flags=COUNTRY_FLAGS,  
     )
 
 @bp.route("/<country>/overview")
@@ -71,9 +105,6 @@ def overview(country):
     return render_template(
         "overview.html",
         results=results,
-        country=country,
-        currency=currency,
-        country_flags=COUNTRY_FLAGS,
     )
 
 @bp.route("/<country>/best_deals")
@@ -85,9 +116,6 @@ def best_deals(country):
     return render_template(
         "best_deals.html",
         listings=listings,
-        country=country,
-        currency=currency,
-        country_flags=COUNTRY_FLAGS,
     )
 
 @bp.route("/<country>/drops")
@@ -99,9 +127,6 @@ def price_drops(country):
     return render_template(
         "price_drops.html",
         rows=rows,
-        country=country,
-        currency=currency,
-        country_flags=COUNTRY_FLAGS,
     )
 
 @bp.route("/<country>/models")
@@ -113,7 +138,4 @@ def models(country):
     return render_template(
         "models.html",
         models=models,
-        country=country,
-        currency=currency,
-        country_flags=COUNTRY_FLAGS,
     )

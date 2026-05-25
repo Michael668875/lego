@@ -135,3 +135,6 @@ def run_pipeline():
     insert_price_history()
 
     db.session.commit()
+
+#with app.app_context():
+#    run_pipeline()
