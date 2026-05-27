@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for
+from flask import Blueprint, render_template, redirect, url_for, g, request, abort
 from datetime import datetime, timezone
 from app.route_helpers import *
 
@@ -40,11 +40,11 @@ def timeago(dt):
         return f"{days} day{'s' if days != 1 else ''} ago"
     else:
         return dt.strftime("%d %b %Y")
-    
-DEFAULT_COUNTRY = "us"
 
-@bp.app_context_processor
-def inject_site_globals():
+DEFAULT_COUNTRY = "us"    
+
+@bp.before_app_request
+def load_country_context():
     country = request.view_args.get("country") if request.view_args else None
 
     if not country:
@@ -52,12 +52,22 @@ def inject_site_globals():
 
     country = (country or DEFAULT_COUNTRY).lower()
 
-    currency = CURRENCY_BY_COUNTRY.get(country, "USD")
+    markets = get_enabled_markets()
 
+    if country not in markets:
+        abort(404)
+
+    g.country = country
+    g.marketplaces = [markets[country]]
+    g.currency = CURRENCY_BY_COUNTRY.get(country, "USD")
+    
+
+@bp.app_context_processor
+def inject_site_globals():
     return {
-        "country": country,
+        "country": g.country,
         "country_flags": COUNTRY_FLAGS,
-        "currency": currency,
+        "currency": g.currency,
     }
 
 
@@ -83,9 +93,8 @@ def index():
 
 @bp.route("/<country>/")
 def listings(country):
-    country, marketplaces, currency = get_country_context_or_404(country)
 
-    query = db_query(marketplaces)
+    query = db_query(g.marketplaces)
 
     listings = page_nums(query)
 
@@ -96,9 +105,8 @@ def listings(country):
 
 @bp.route("/<country>/overview")
 def overview(country):
-    country, marketplaces, currency = get_country_context_or_404(country)
-
-    query = db_overview(marketplaces)
+    
+    query = db_overview(g.marketplaces)
 
     results = page_nums(query)
 
@@ -108,10 +116,9 @@ def overview(country):
     )
 
 @bp.route("/<country>/best_deals")
-def best_deals(country):
-    country, marketplaces, currency = get_country_context_or_404(country)    
+def best_deals(country):        
 
-    listings = bestdeals_listings(marketplaces)
+    listings = bestdeals_listings(g.marketplaces)
 
     return render_template(
         "best_deals.html",
@@ -119,10 +126,9 @@ def best_deals(country):
     )
 
 @bp.route("/<country>/drops")
-def price_drops(country):
-    country, marketplaces, currency = get_country_context_or_404(country)
+def price_drops(country):    
 
-    rows = drops_query(marketplaces)
+    rows = drops_query(g.marketplaces)
 
     return render_template(
         "price_drops.html",
@@ -130,10 +136,9 @@ def price_drops(country):
     )
 
 @bp.route("/<country>/models")
-def models(country):
-    country, marketplaces, currency = get_country_context_or_404(country)
+def models(country):    
 
-    models = model_query(marketplaces)
+    models = model_query(g.marketplaces)
 
     return render_template(
         "models.html",

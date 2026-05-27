@@ -134,11 +134,15 @@
 
 .model-chip:hover {
   text-decoration: none;
-  color: inherit;
-  border-color: #3b5af5;
-  background: #c6d6f8;
+  color: white;
+  border-color: #ff0000;
+  background: #f90808;
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
   transform: translateY(-1px);
+}
+
+.model-chip:hover .model-last-seen {
+  color: white;
 }
 
 .model-name {
