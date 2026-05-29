@@ -24,12 +24,6 @@
       </div>
 {% endmacro %}
 
-{% macro titles() %}
-<div class="section-title">2. Brick Marketplace</div>
-      <div class="section-subtitle">
-        Bright and approachable marketplace styling with strong visual browsing.
-      </div>
-{% endmacro %}
 
 {% macro navigation(country, country_flags) %}
 <nav class="navbar navbar-expand-lg navbar-custom px-4 py-3">
@@ -290,4 +284,155 @@
                 <td colspan="5">No models found.</td>
             </tr>
   {% endif %}
+{% endmacro %}
+
+{% macro set_hero(set_data, stats=None) %}
+
+<div class="card border-0 shadow-sm mb-4">
+    <div class="row g-0">
+
+        <!-- image -->
+        <div class="col-md-4 text-center p-4">
+
+            {% if set_data.img_url %}
+            <img
+                src="{{ set_data.img_url }}"
+                alt="{{ set_data.name }}"
+                class="img-fluid rounded"
+                style="max-height: 320px;"
+            >
+            {% else %}
+            <div class="text-muted">
+                No image available
+            </div>
+            {% endif %}
+
+        </div>
+
+        <!-- info -->
+        <div class="col-md-8">
+
+            <div class="card-body h-100 d-flex flex-column">
+
+                <!-- title -->
+                <div class="mb-3">
+
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+
+                        <h1 class="h2 mb-0">
+                            {{ set_data.name }}
+                        </h1>
+
+                        <span class="badge bg-secondary">
+                            {{ set_data.base_set_num }}
+                        </span>
+
+                    </div>
+
+                    {% if set_data.theme %}
+                    <div class="text-muted mt-2">
+                        {{ set_data.theme.name }}
+                    </div>
+                    {% endif %}
+
+                </div>
+
+                <!-- metadata -->
+                <div class="row mb-4">
+
+                    <div class="col-6 col-md-3 mb-3">
+                        <div class="text-muted small">
+                            Release Year
+                        </div>
+                        <div class="fw-semibold">
+                            {{ set_data.year or "-" }}
+                        </div>
+                    </div>
+
+                    <div class="col-6 col-md-3 mb-3">
+                        <div class="text-muted small">
+                            Pieces
+                        </div>
+                        <div class="fw-semibold">
+                            {{ "{:,}".format(set_data.num_parts) if set_data.num_parts else "-" }}
+                        </div>
+                    </div>
+
+                    {% if stats %}
+                    <div class="col-6 col-md-3 mb-3">
+                        <div class="text-muted small">
+                            Active Listings
+                        </div>
+                        <div class="fw-semibold">
+                            {{ stats.active_count or 0 }}
+                        </div>
+                    </div>
+
+                    <div class="col-6 col-md-3 mb-3">
+                        <div class="text-muted small">
+                            Cheapest Price
+                        </div>
+                        <div class="fw-semibold">
+                            {% if stats.cheapest_price %}
+                                {{ currency }} ${{ stats.cheapest_price }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                </div>
+
+                <!-- tags -->
+                <div class="mb-4 d-flex flex-wrap gap-2">
+
+                    {% if set_data.num_parts and set_data.num_parts > 2000 %}
+                    <span class="badge bg-dark">
+                        Large Set
+                    </span>
+                    {% endif %}
+
+                    {% if set_data.year and set_data.year < 2000 %}
+                    <span class="badge bg-warning text-dark">
+                        Vintage
+                    </span>
+                    {% endif %}
+
+                    {% if stats and stats.active_count and stats.active_count < 3 %}
+                    <span class="badge bg-danger">
+                        Rare Listing
+                    </span>
+                    {% endif %}
+
+                </div>
+
+                <!-- actions -->
+                <div class="mt-auto d-flex gap-2 flex-wrap">
+
+                    <a
+                        href="#listings"
+                        class="btn btn-primary"
+                    >
+                        View Listings
+                    </a>
+
+                    {% if set_data.theme %}
+                    <a
+                        href="{{ url_for('main.theme', theme_id=set_data.theme.id) }}"
+                        class="btn btn-outline-secondary"
+                    >
+                        More {{ set_data.theme.name }}
+                    </a>
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
 {% endmacro %}

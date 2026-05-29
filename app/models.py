@@ -1,4 +1,4 @@
-from app.extensions import db
+from app import db
 from datetime import timezone, datetime
 from sqlalchemy import func
 
@@ -82,3 +82,45 @@ class PriceHistory(db.Model):
     recorded_at = db.Column(db.DateTime(timezone=True), nullable=False, server_default=func.now(), index=True)
 
     listing = db.relationship("Listing", back_populates="price_history")
+
+
+class LegoSet(db.Model):
+    __tablename__ = "lego_sets"
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    # Rebrickable canonical set number
+    suffix_set_num = db.Column(db.String(32), unique=True, nullable=False, index=True)
+
+    # Base set number without suffix
+    base_set_num = db.Column(db.String(32), index=True)
+
+    name = db.Column(db.String(255), nullable=False)
+    year = db.Column(db.Integer, index=True)
+    theme_id = db.Column(db.Integer, db.ForeignKey("themes.id"), index=True)
+    num_parts = db.Column(db.Integer)
+    img_url = db.Column(db.Text)
+
+    theme = db.relationship("Theme")
+
+    def __repr__(self):
+        return f"<LegoSet {self.set_num} {self.name}>"
+    
+class Theme(db.Model):
+    __tablename__ = "themes"
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    name = db.Column(db.String(255), nullable=False)
+
+    parent_id = db.Column(
+        db.Integer,
+        db.ForeignKey("themes.id"),
+        nullable=True
+    )
+
+    parent = db.relationship(
+        "Theme",
+        remote_side=[id],
+        backref="children"
+    )

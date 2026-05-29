@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, g, request, abort
 from datetime import datetime, timezone
 from app.route_helpers import *
+from app.models import LegoSet
 
 
 bp = Blueprint("main", __name__)
@@ -44,7 +45,7 @@ def timeago(dt):
 DEFAULT_COUNTRY = "us"    
 
 @bp.before_app_request
-def load_country_context():
+def load_country_context():    
     country = request.view_args.get("country") if request.view_args else None
 
     if not country:
@@ -65,9 +66,9 @@ def load_country_context():
 @bp.app_context_processor
 def inject_site_globals():
     return {
-        "country": g.country,
+        "country": getattr(g, "country", DEFAULT_COUNTRY),
         "country_flags": COUNTRY_FLAGS,
-        "currency": g.currency,
+        "currency": getattr(g, "currency", "USD"),
     }
 
 
@@ -144,3 +145,26 @@ def models(country):
         "models.html",
         models=models,
     )
+
+"""@bp.route("/set/<base_set>")
+def set_page(base_set):
+
+    set_data = (
+        LegoSet.query
+        .filter_by(base_set_num=base_set)
+        .order_by(LegoSet.year.desc())
+        .first_or_404()
+    )
+
+    stats = db.session.query(
+        func.count(Listing.id).label("active_count"),
+        func.min(Listing.price).label("cheapest_price")
+    ).filter(
+        Listing.base_set_num == base_set
+    ).first()
+
+    return render_template(
+        "set_page.html",
+        set_data=set_data,
+        stats=stats,
+    )"""
