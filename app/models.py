@@ -104,7 +104,7 @@ class LegoSet(db.Model):
     theme = db.relationship("Theme")
 
     def __repr__(self):
-        return f"<LegoSet {self.set_num} {self.name}>"
+        return f"<LegoSet {self.base_set_num} {self.name}>"
     
 class Theme(db.Model):
     __tablename__ = "themes"

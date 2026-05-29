@@ -41,27 +41,66 @@ def timeago(dt):
         return f"{days} day{'s' if days != 1 else ''} ago"
     else:
         return dt.strftime("%d %b %Y")
+    
 
+"""
 DEFAULT_COUNTRY = "us"    
 
 @bp.before_app_request
-def load_country_context():    
-    country = request.view_args.get("country") if request.view_args else None
+def load_country_context():
 
+    country = None
+
+    # 1. route-based country (if exists)
+    if request.view_args:
+        country = request.view_args.get("country")
+
+    # 2. cookie fallback
     if not country:
-        country = request.cookies.get("country", DEFAULT_COUNTRY)
+        country = request.cookies.get("country")
 
+    # 3. default fallback
     country = (country or DEFAULT_COUNTRY).lower()
 
     markets = get_enabled_markets()
 
+    # 4. safety fallback (DO NOT abort globally)
     if country not in markets:
-        abort(404)
+        country = DEFAULT_COUNTRY
 
     g.country = country
     g.marketplaces = [markets[country]]
-    g.currency = CURRENCY_BY_COUNTRY.get(country, "USD")
-    
+    g.currency = CURRENCY_BY_COUNTRY.get(country, "USD")    
+"""
+from functools import wraps
+from flask import g, request
+
+DEFAULT_COUNTRY = "us"
+
+def with_market_context(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+
+        country = kwargs.get("country")
+
+        if not country:
+            country = request.cookies.get("country", DEFAULT_COUNTRY)
+
+        country = country.lower()
+
+        markets = get_enabled_markets()
+
+        if country not in markets:
+            country = DEFAULT_COUNTRY
+
+        g.country = country
+        g.marketplaces = [markets[country]]
+        g.currency = CURRENCY_BY_COUNTRY.get(country, "USD")
+
+        return f(*args, **kwargs)
+
+    return wrapper
+
 
 @bp.app_context_processor
 def inject_site_globals():
@@ -72,12 +111,12 @@ def inject_site_globals():
     }
 
 
-@bp.after_app_request
+"""@bp.after_app_request
 def persist_country_cookie(response):
     if request.view_args and "country" in request.view_args:
         country = request.view_args["country"].lower()
         response.set_cookie("country", country, max_age=60 * 60 * 24 * 365)
-    return response
+    return response"""
 
 
 @bp.route("/")
@@ -93,6 +132,7 @@ def index():
     return redirect(url_for("main.listings", country="us"))
 
 @bp.route("/<country>/")
+@with_market_context
 def listings(country):
 
     query = db_query(g.marketplaces)
@@ -105,6 +145,7 @@ def listings(country):
     )
 
 @bp.route("/<country>/overview")
+@with_market_context
 def overview(country):
     
     query = db_overview(g.marketplaces)
@@ -117,6 +158,7 @@ def overview(country):
     )
 
 @bp.route("/<country>/best_deals")
+@with_market_context
 def best_deals(country):        
 
     listings = bestdeals_listings(g.marketplaces)
@@ -127,6 +169,7 @@ def best_deals(country):
     )
 
 @bp.route("/<country>/drops")
+@with_market_context
 def price_drops(country):    
 
     rows = drops_query(g.marketplaces)
@@ -137,6 +180,7 @@ def price_drops(country):
     )
 
 @bp.route("/<country>/models")
+@with_market_context
 def models(country):    
 
     models = model_query(g.marketplaces)
@@ -146,7 +190,7 @@ def models(country):
         models=models,
     )
 
-"""@bp.route("/set/<base_set>")
+@bp.route("/<base_set>")
 def set_page(base_set):
 
     set_data = (
@@ -160,11 +204,11 @@ def set_page(base_set):
         func.count(Listing.id).label("active_count"),
         func.min(Listing.price).label("cheapest_price")
     ).filter(
-        Listing.base_set_num == base_set
+        Listing.set_num == base_set
     ).first()
 
     return render_template(
         "set_page.html",
         set_data=set_data,
         stats=stats,
-    )"""
+    )
