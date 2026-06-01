@@ -212,3 +212,31 @@ def set_page(base_set):
         set_data=set_data,
         stats=stats,
     )
+
+@bp.route("/about")
+def about():
+    return render_template("about.html")
+
+
+@bp.route("/how-it-works")
+def methodology():
+    return render_template("methodology.html")
+
+
+@bp.route("/privacy")
+def privacy():
+    return render_template("privacy.html")
+
+
+@bp.route("/terms")
+def terms():
+    return render_template("terms.html")
+
+
+@bp.route("/contact")
+def contact():
+    return render_template("contact.html")
+
+@bp.route("/affiliate-disclosure")
+def affiliate_disclosure():
+    return render_template("affiliate_disclosure.html")

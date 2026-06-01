@@ -1,0 +1,68 @@
+{% extends "layout.html" %}
+
+{% block title %}How It Works | ThinkPad Price Tracker{% endblock %}
+{% block description %}Learn how ThinkPad Price Tracker collects listings, identifies ThinkPad models, estimates average prices, and highlights potential deals.{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h1 class="mb-4">How It Works</h1>
+
+    <p>
+        ThinkPad Price Tracker estimates used ThinkPad prices by analyzing recent eBay listings and grouping them by model.
+    </p>
+
+    <h2 class="h4 mt-4">1. Listings are collected from eBay</h2>
+    <p>
+        The site uses recent eBay listing data as the source for pricing. Listings may include variation in condition, configuration, shipping, and seller quality.
+    </p>
+
+    <h2 class="h4 mt-4">2. Listings are filtered and normalized</h2>
+    <p>
+        Listing titles and available specifications are processed to identify the most likely ThinkPad model and normalize common variations in naming.
+    </p>
+
+    <p>
+        Some listings may still be imperfectly classified, especially when sellers use incomplete, inconsistent, or incorrect titles.
+    </p>
+
+    <h2 class="h4 mt-4">3. Model prices are estimated</h2>
+    <p>
+        For each model, the site calculates price statistics such as recent low, average, and high prices from tracked listings.
+    </p>
+
+    <p>
+        These values are intended as rough market indicators, not exact valuations.
+    </p>
+
+    <h2 class="h4 mt-4">4. “Best deals” are identified</h2>
+    <p>
+        A listing may be marked as a strong deal when its price is significantly below the recent average for that model.
+    </p>
+
+    <p>
+        This is only a price-based estimate. A listing may appear cheap because of:
+    </p>
+
+    <ul>
+        <li>poor cosmetic condition</li>
+        <li>battery wear or faults</li>
+        <li>missing charger or parts</li>
+        <li>lower-end specs</li>
+        <li>locked BIOS / damaged screens / other defects</li>
+        <li>high shipping or limited returns</li>
+    </ul>
+
+    <h2 class="h4 mt-4">Important limitations</h2>
+    <ul>
+        <li>Prices can change quickly</li>
+        <li>Listings can end or be removed</li>
+        <li>Model detection is not perfect</li>
+        <li>Some sellers use inaccurate titles</li>
+        <li>Regional supply and demand can differ a lot</li>
+    </ul>
+
+    <div class="alert alert-secondary mt-4">
+        Always review the full listing details before purchasing. This site is a research tool, not a guarantee of value or condition.
+    </div>
+</div>
+{% endblock %}
