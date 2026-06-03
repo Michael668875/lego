@@ -222,6 +222,13 @@ def about():
 def methodology():
     return render_template("methodology.html")
 
+@bp.route("/affiliate-disclosure")
+def affiliate_disclosure():
+    return render_template("affiliate_disclosure.html")
+
+@bp.route("/disclaimer")
+def disclaimer():
+    return render_template("disclaimer.html")
 
 @bp.route("/privacy")
 def privacy():
@@ -237,6 +244,4 @@ def terms():
 def contact():
     return render_template("contact.html")
 
-@bp.route("/affiliate-disclosure")
-def affiliate_disclosure():
-    return render_template("affiliate_disclosure.html")
+

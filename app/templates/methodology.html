@@ -1,68 +1,46 @@
 {% extends "layout.html" %}
 
-{% block title %}How It Works | ThinkPad Price Tracker{% endblock %}
-{% block description %}Learn how ThinkPad Price Tracker collects listings, identifies ThinkPad models, estimates average prices, and highlights potential deals.{% endblock %}
-
 {% block content %}
-<div class="container py-4">
-    <h1 class="mb-4">How It Works</h1>
 
-    <p>
-        ThinkPad Price Tracker estimates used ThinkPad prices by analyzing recent eBay listings and grouping them by model.
-    </p>
+<h1>Methodology</h1>
 
-    <h2 class="h4 mt-4">1. Listings are collected from eBay</h2>
-    <p>
-        The site uses recent eBay listing data as the source for pricing. Listings may include variation in condition, configuration, shipping, and seller quality.
-    </p>
+<p>
+The pricing information displayed on this website is generated from publicly
+available marketplace listings.
+</p>
 
-    <h2 class="h4 mt-4">2. Listings are filtered and normalized</h2>
-    <p>
-        Listing titles and available specifications are processed to identify the most likely ThinkPad model and normalize common variations in naming.
-    </p>
+<h2>Data Collection</h2>
 
-    <p>
-        Some listings may still be imperfectly classified, especially when sellers use incomplete, inconsistent, or incorrect titles.
-    </p>
+<p>
+We collect listing information from supported marketplaces and process the data
+using automated systems.
+</p>
 
-    <h2 class="h4 mt-4">3. Model prices are estimated</h2>
-    <p>
-        For each model, the site calculates price statistics such as recent low, average, and high prices from tracked listings.
-    </p>
+<h2>Price Calculations</h2>
 
-    <p>
-        These values are intended as rough market indicators, not exact valuations.
-    </p>
+<p>
+Prices shown on the site are calculated using available listing data at the
+time of collection.
+</p>
 
-    <h2 class="h4 mt-4">4. “Best deals” are identified</h2>
-    <p>
-        A listing may be marked as a strong deal when its price is significantly below the recent average for that model.
-    </p>
+<p>
+Marketplace prices may change at any time and may not reflect shipping costs,
+taxes, import duties, or other fees.
+</p>
 
-    <p>
-        This is only a price-based estimate. A listing may appear cheap because of:
-    </p>
+<h2>Data Accuracy</h2>
 
-    <ul>
-        <li>poor cosmetic condition</li>
-        <li>battery wear or faults</li>
-        <li>missing charger or parts</li>
-        <li>lower-end specs</li>
-        <li>locked BIOS / damaged screens / other defects</li>
-        <li>high shipping or limited returns</li>
-    </ul>
+<p>
+While we strive to provide accurate information, errors and delays may occur.
+Users should verify prices directly with the seller before making purchasing
+decisions.
+</p>
 
-    <h2 class="h4 mt-4">Important limitations</h2>
-    <ul>
-        <li>Prices can change quickly</li>
-        <li>Listings can end or be removed</li>
-        <li>Model detection is not perfect</li>
-        <li>Some sellers use inaccurate titles</li>
-        <li>Regional supply and demand can differ a lot</li>
-    </ul>
+<h2>Independence</h2>
 
-    <div class="alert alert-secondary mt-4">
-        Always review the full listing details before purchasing. This site is a research tool, not a guarantee of value or condition.
-    </div>
-</div>
+<p>
+Price rankings and listings are generated automatically and are not influenced
+by advertisers, affiliates, or sellers.
+</p>
+
 {% endblock %}
