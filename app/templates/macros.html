@@ -124,7 +124,14 @@
                     src="{{ listing.image_urls[0] }}">
                 <div>
                     <div class="fw-semibold">{{ listing.title }}</div>
-                    <small class="text-secondary">{{ listing.set_num if listing.set_num else "-" }}</small>
+                    <small class="text-secondary">
+                      {% if listing.set_num %}
+                      <a href="{{ url_for('main.set_page', base_set=listing.set_num ) }}">{{ listing.set_num }}</a>
+                      {% else %}
+                      -
+                      {% endif %}
+                    
+                    </small>
                 </div>
                 </div>
             </td>

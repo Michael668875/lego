@@ -1,7 +1,8 @@
-from flask import Blueprint, render_template, redirect, url_for, g, request, abort
+from flask import Blueprint, render_template, redirect, url_for, g, request, abort, Response
 from datetime import datetime, timezone
 from app.route_helpers import *
 from app.models import LegoSet
+from functools import wraps
 
 
 bp = Blueprint("main", __name__)
@@ -42,39 +43,7 @@ def timeago(dt):
     else:
         return dt.strftime("%d %b %Y")
     
-
-"""
-DEFAULT_COUNTRY = "us"    
-
-@bp.before_app_request
-def load_country_context():
-
-    country = None
-
-    # 1. route-based country (if exists)
-    if request.view_args:
-        country = request.view_args.get("country")
-
-    # 2. cookie fallback
-    if not country:
-        country = request.cookies.get("country")
-
-    # 3. default fallback
-    country = (country or DEFAULT_COUNTRY).lower()
-
-    markets = get_enabled_markets()
-
-    # 4. safety fallback (DO NOT abort globally)
-    if country not in markets:
-        country = DEFAULT_COUNTRY
-
-    g.country = country
-    g.marketplaces = [markets[country]]
-    g.currency = CURRENCY_BY_COUNTRY.get(country, "USD")    
-"""
-from functools import wraps
-from flask import g, request
-
+    
 DEFAULT_COUNTRY = "us"
 
 def with_market_context(f):
@@ -109,14 +78,6 @@ def inject_site_globals():
         "country_flags": COUNTRY_FLAGS,
         "currency": getattr(g, "currency", "USD"),
     }
-
-
-"""@bp.after_app_request
-def persist_country_cookie(response):
-    if request.view_args and "country" in request.view_args:
-        country = request.view_args["country"].lower()
-        response.set_cookie("country", country, max_age=60 * 60 * 24 * 365)
-    return response"""
 
 
 @bp.route("/")
@@ -190,12 +151,12 @@ def models(country):
         models=models,
     )
 
-@bp.route("/<base_set>")
+@bp.route("/set/<base_set>")
 def set_page(base_set):
 
     set_data = (
         LegoSet.query
-        .filter_by(base_set_num=base_set)
+        .filter_by(base_set_num=str(base_set))
         .order_by(LegoSet.year.desc())
         .first_or_404()
     )

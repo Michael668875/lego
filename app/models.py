@@ -124,3 +124,22 @@ class Theme(db.Model):
         remote_side=[id],
         backref="children"
     )
+
+class SetPriceStats(db.Model):
+    __tablename__ = "set_price_stats"
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    set_id = db.Column(db.Integer, db.ForeignKey("lego_sets.id"))
+    marketplace = db.Column(db.String(10))
+
+    listing_count = db.Column(db.Integer)
+
+    min_price = db.Column(db.Numeric(10, 2))
+    avg_price = db.Column(db.Numeric(10, 2))
+    median_price = db.Column(db.Numeric(10, 2))
+    max_price = db.Column(db.Numeric(10, 2))
+
+    updated_at = db.Column(db.DateTime(timezone=True))
+
+    lego_set = db.relationship("LegoSet", backref="listings")
