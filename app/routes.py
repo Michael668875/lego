@@ -43,32 +43,34 @@ def timeago(dt):
     else:
         return dt.strftime("%d %b %Y")
     
-    
-DEFAULT_COUNTRY = "us"
 
-def with_market_context(f):
-    @wraps(f)
-    def wrapper(*args, **kwargs):
+DEFAULT_COUNTRY = "us"    
 
-        country = kwargs.get("country")
+@bp.before_app_request
+def load_country_context():
 
-        if not country:
-            country = request.cookies.get("country", DEFAULT_COUNTRY)
+    country = None
 
-        country = country.lower()
+    # 1. route-based country (if exists)
+    if request.view_args:
+        country = request.view_args.get("country")
 
-        markets = get_enabled_markets()
+    # 2. cookie fallback
+    if not country:
+        country = request.cookies.get("country")
 
-        if country not in markets:
-            country = DEFAULT_COUNTRY
+    # 3. default fallback
+    country = (country or DEFAULT_COUNTRY).lower()
 
-        g.country = country
-        g.marketplaces = [markets[country]]
-        g.currency = CURRENCY_BY_COUNTRY.get(country, "USD")
+    markets = get_enabled_markets()
 
-        return f(*args, **kwargs)
+    # 4. safety fallback (DO NOT abort globally)
+    if country not in markets:
+        country = DEFAULT_COUNTRY
 
-    return wrapper
+    g.country = country
+    g.marketplaces = [markets[country]]
+    g.currency = CURRENCY_BY_COUNTRY.get(country, "USD")    
 
 
 @bp.app_context_processor
@@ -80,6 +82,7 @@ def inject_site_globals():
     }
 
 
+
 @bp.route("/")
 def index():
     preferred = request.cookies.get("country")
@@ -88,12 +91,11 @@ def index():
     if preferred:
         preferred = preferred.lower()
         if preferred in valid_countries:
-            return redirect(url_for("main.listings", country=preferred))
+           return redirect(url_for("main.listings", country=preferred))
 
     return redirect(url_for("main.listings", country="us"))
 
 @bp.route("/<country>/")
-@with_market_context
 def listings(country):
 
     query = db_query(g.marketplaces)
@@ -106,7 +108,6 @@ def listings(country):
     )
 
 @bp.route("/<country>/overview")
-@with_market_context
 def overview(country):
     
     query = db_overview(g.marketplaces)
@@ -119,7 +120,6 @@ def overview(country):
     )
 
 @bp.route("/<country>/best_deals")
-@with_market_context
 def best_deals(country):        
 
     listings = bestdeals_listings(g.marketplaces)
@@ -130,7 +130,6 @@ def best_deals(country):
     )
 
 @bp.route("/<country>/drops")
-@with_market_context
 def price_drops(country):    
 
     rows = drops_query(g.marketplaces)
@@ -141,7 +140,6 @@ def price_drops(country):
     )
 
 @bp.route("/<country>/models")
-@with_market_context
 def models(country):    
 
     models = model_query(g.marketplaces)
@@ -151,8 +149,8 @@ def models(country):
         models=models,
     )
 
-@bp.route("/set/<base_set>")
-def set_page(base_set):
+@bp.route("/<country>/set/<base_set>")
+def set_page(country, base_set):
 
     set_data = (
         LegoSet.query
@@ -165,7 +163,8 @@ def set_page(base_set):
         func.count(Listing.id).label("active_count"),
         func.min(Listing.price).label("cheapest_price")
     ).filter(
-        Listing.set_num == base_set
+        Listing.set_num == base_set,
+        Listing.country == g.country.upper()
     ).first()
 
     return render_template(
@@ -174,35 +173,35 @@ def set_page(base_set):
         stats=stats,
     )
 
-@bp.route("/about")
-def about():
+@bp.route("/<country>/about")
+def about(country):
     return render_template("about.html")
 
 
-@bp.route("/how-it-works")
-def methodology():
+@bp.route("/<country>/how-it-works")
+def methodology(country):
     return render_template("methodology.html")
 
-@bp.route("/affiliate-disclosure")
-def affiliate_disclosure():
+@bp.route("/<country>/affiliate-disclosure")
+def affiliate_disclosure(country):
     return render_template("affiliate_disclosure.html")
 
-@bp.route("/disclaimer")
-def disclaimer():
+@bp.route("/<country>/disclaimer")
+def disclaimer(country):
     return render_template("disclaimer.html")
 
-@bp.route("/privacy")
-def privacy():
+@bp.route("/<country>/privacy")
+def privacy(country):
     return render_template("privacy.html")
 
 
-@bp.route("/terms")
-def terms():
+@bp.route("/<country>/terms")
+def terms(country):
     return render_template("terms.html")
 
 
-@bp.route("/contact")
-def contact():
+@bp.route("/<country>/contact")
+def contact(country):
     return render_template("contact.html")
 
 

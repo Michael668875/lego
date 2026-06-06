@@ -18,7 +18,7 @@ def insert_listings():
             image_urls,
             condition,
             marketplace,
-            item_country,
+            country,
             affiliate_url,
             last_seen,
             status
@@ -136,5 +136,5 @@ def run_pipeline():
 
     db.session.commit()
 
-#with app.app_context():
-#    run_pipeline()
+with app.app_context():
+    run_pipeline()

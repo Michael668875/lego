@@ -7,13 +7,13 @@
             </div>
 
             <div class="d-flex flex-wrap gap-3">
-                <a href="{{ url_for('main.about') }}" class="text-secondary text-decoration-none">About</a>
-                <a href="{{ url_for('main.methodology') }}" class="text-secondary text-decoration-none">How It Works</a>
-                <a href="{{ url_for('main.affiliate_disclosure') }}" class="text-secondary text-decoration-none">Affiliate Disclosure</a>
-                <a href="{{ url_for('main.disclaimer') }}" class="text-secondary text-decoration-none">Disclaimer</a>
-                <a href="{{ url_for('main.privacy') }}" class="text-secondary text-decoration-none">Privacy</a>
-                <a href="{{ url_for('main.terms') }}" class="text-secondary text-decoration-none">Terms</a>
-                <a href="{{ url_for('main.contact') }}" class="text-secondary text-decoration-none">Contact</a>
+                <a href="{{ url_for('main.about', country=country) }}" class="text-secondary text-decoration-none">About</a>
+                <a href="{{ url_for('main.methodology', country=country) }}" class="text-secondary text-decoration-none">How It Works</a>
+                <a href="{{ url_for('main.affiliate_disclosure', country=country) }}" class="text-secondary text-decoration-none">Affiliate Disclosure</a>
+                <a href="{{ url_for('main.disclaimer', country=country) }}" class="text-secondary text-decoration-none">Disclaimer</a>
+                <a href="{{ url_for('main.privacy', country=country) }}" class="text-secondary text-decoration-none">Privacy</a>
+                <a href="{{ url_for('main.terms', country=country) }}" class="text-secondary text-decoration-none">Terms</a>
+                <a href="{{ url_for('main.contact', country=country) }}" class="text-secondary text-decoration-none">Contact</a>
             </div>
         </div>
 

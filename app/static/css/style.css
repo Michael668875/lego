@@ -216,3 +216,12 @@
     box-shadow: none;
 }
 
+.text-secondary a {
+  color: #8c8b8b;
+  text-decoration: none;
+}
+
+.text-secondary a:hover {
+  color: #e00d0d;
+  text-decoration: none;
+}

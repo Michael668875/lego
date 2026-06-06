@@ -126,7 +126,7 @@
                     <div class="fw-semibold">{{ listing.title }}</div>
                     <small class="text-secondary">
                       {% if listing.set_num %}
-                      <a href="{{ url_for('main.set_page', base_set=listing.set_num ) }}">{{ listing.set_num }}</a>
+                      <a href="{{ url_for('main.set_page', base_set=listing.set_num, country=g.country ) }}">{{ listing.set_num }}</a>
                       {% else %}
                       -
                       {% endif %}
@@ -293,7 +293,7 @@
   {% endif %}
 {% endmacro %}
 
-{% macro set_hero(set_data, stats=None) %}
+{% macro set_hero(set_data, stats=None, currency=None) %}
 
 <div class="card border-0 shadow-sm mb-4">
     <div class="row g-0">

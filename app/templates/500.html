@@ -1,1 +1,28 @@
-placeholder 500
+{% extends "layout.html" %}
+
+{% block title %}Server Error | BrickDrops{% endblock %}
+{% block description %}Something went wrong while loading this page.{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="text-center">
+        <h1 class="display-5 mb-3">500 - Something Went Wrong</h1>
+        <p class="lead text-secondary mb-4">
+            An unexpected error occurred while loading this page.
+        </p>
+
+        <p class="mb-4">
+            Please try again in a moment. If the problem continues, the page may be missing data or temporarily unavailable.
+        </p>
+
+        <div class="d-flex flex-column flex-sm-row justify-content-center gap-2">
+            <a href="{{ url_for('main.listings', country=country) }}" class="btn btn-primary">
+                Go to Home
+            </a>
+            <a href="{{ url_for('main.overview', country=country) }}" class="btn btn-outline-dark">
+                Market Overview
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
