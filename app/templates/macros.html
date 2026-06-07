@@ -290,34 +290,39 @@
 {% endmacro %}
 
 
-{% macro models_table(grouped_models, country) %}
+{% macro models_table(themes, country) %}
 
 <div class="series-nav">
-  {% for theme, models in grouped_models.items() %}
-    <a href="#theme-{{ theme }}">{{ theme }}</a>
+  {% for theme in themes %}
+    <a href="#theme-{{ theme.slug }}" class="btn btn-sm btn">
+      {{ theme.name }}
+    </a>
   {% endfor %}
 </div>
 
-{% for theme, models in grouped_models.items() %}
-  <section id="theme-{{ theme }}" class="model-series">
-    <h2>{{ theme }}</h2>
+<div class="model-stream">
 
-    <div class="model-grid">
-      {% for model in models %}
-        <div class="model-chip">
-          {{ model.set_num }} {{ model.name }}
+  {% for theme in themes %}
+    <section id="theme-{{ theme.slug }}" class="model-series">
+      <span class="theme-label theme-{{ loop.index0 % 4 }}">
+        {{ theme.name }}
+      </span>
+    </section>
 
-          {% if model.last_seen %}
-            <small class="model-last-seen">
-              Seen {{ model.last_seen|timeago }}
-            </small>
-          {% endif %}
-        </div>
-      {% endfor %}
-    </div>
-  </section>
-{% endfor %}
+    {% for model in theme.models %}
+      <a class="model-chip theme-{{ loop.index0 % 4 }}"
+         href="{{ url_for('main.set_list',
+           country=g.country.lower(),
+           set_num=model.set_num) }}">
 
+        <span>{{ model.set_num }}</span>
+        <small>{{ model.name }}</small>
+      </a>
+    {% endfor %}
+
+  {% endfor %}
+
+</div>
 {% endmacro %}
 
 {% macro set_hero(set_data, stats=None, currency=None) %}

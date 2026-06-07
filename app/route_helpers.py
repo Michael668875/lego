@@ -213,6 +213,7 @@ def model_query(marketplaces):
             Listing.set_num,
             LegoSet.name.label("name"),
             LegoSet.theme_id.label("theme_id"),
+            Theme.name.label("theme_name"),
             func.count(Listing.id).label("count"),
             func.max(Listing.last_seen).label("last_seen"),
         )
@@ -226,7 +227,7 @@ def model_query(marketplaces):
             Listing.set_num,
             LegoSet.name,
             LegoSet.theme_id,
-            Theme.name.label("theme_name"),
+            Theme.name,           
         )
         .order_by(func.count(Listing.id).desc())
         .all()

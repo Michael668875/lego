@@ -3,8 +3,7 @@ from datetime import datetime, timezone
 from app.route_helpers import *
 from functools import wraps
 from collections import defaultdict
-
-
+from slugify import slugify
 
 bp = Blueprint("main", __name__)
 
@@ -178,19 +177,50 @@ def price_drops(country):
         rows=rows,
     )
 
-@bp.route("/<country>/models")
-def models(country):    
+"""@bp.route("/<country>/models")
+def models(country):
 
     rows = model_query(g.marketplaces)
 
     grouped = defaultdict(list)
+    theme_names = {}
 
     for row in rows:
         grouped[row.theme_id].append(row)
+        theme_names[row.theme_id] = row.theme_name
 
     return render_template(
         "models.html",
         grouped_models=grouped,
+        theme_names=theme_names,
+    )"""
+
+
+@bp.route("/<country>/models")
+def models(country):
+
+    rows = model_query(g.marketplaces)
+
+    grouped = defaultdict(list)
+    theme_names = {}
+
+    for row in rows:
+        grouped[row.theme_id].append(row)
+        theme_names[row.theme_id] = row.theme_name
+
+    themes = [
+        {
+            "id": theme_id,
+            "name": theme_names[theme_id],
+            "slug": slugify(theme_names[theme_id]),
+            "models": grouped[theme_id],
+        }
+        for theme_id in grouped.keys()
+    ]
+
+    return render_template(
+        "models.html",
+        themes=themes,
     )
 
 @bp.route("/<country>/set/<base_set>")
