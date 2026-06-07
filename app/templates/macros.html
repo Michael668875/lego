@@ -291,38 +291,48 @@
 
 
 {% macro models_table(themes, country) %}
+<H1>Available Lego Sets</H1>
+<p>
 
 <div class="series-nav">
   {% for theme in themes %}
-    <a href="#theme-{{ theme.slug }}" class="btn btn-sm btn">
+    <a href="#theme-{{ theme.slug }}" class="btn btn-sm btn-danger px-1 mb-2 model-menu">
       {{ theme.name }}
     </a>
   {% endfor %}
 </div>
-
-<div class="model-stream">
+</p>
 
   {% for theme in themes %}
+
+  {% set theme_class = "theme-" ~ (loop.index0 % 4) %}
+
     <section id="theme-{{ theme.slug }}" class="model-series">
-      <span class="theme-label theme-{{ loop.index0 % 4 }}">
+      <span class="theme-label badge text-bg-secondary">
         {{ theme.name }}
       </span>
     </section>
 
+    <div class="model-grid">
     {% for model in theme.models %}
-      <a class="model-chip theme-{{ loop.index0 % 4 }}"
+      <a class="model-chip {{ theme_class }} p-2"
          href="{{ url_for('main.set_list',
            country=g.country.lower(),
            set_num=model.set_num) }}">
 
         <span>{{ model.set_num }}</span>
         <small>{{ model.name }}</small>
+        {% if model.last_seen %} 
+        <small class="model-last-seen">Seen {{ model.last_seen|timeago }}</small> 
+        {% else %} 
+        <small class="model-last-seen">Not Seen</small> 
+        {% endif %}
       </a>
     {% endfor %}
-
+      </div>
   {% endfor %}
 
-</div>
+
 {% endmacro %}
 
 {% macro set_hero(set_data, stats=None, currency=None) %}
