@@ -1,6 +1,6 @@
 from flask import abort, request
 from sqlalchemy import func
-from app.models import Listing, PriceHistory
+from app.models import Listing, PriceHistory, LegoSet, Theme
 from app.extensions import db
 
 
@@ -27,31 +27,21 @@ def get_enabled_markets():
     """Return enabled marketplaces as dict keyed by country code."""
     return {m.split("_")[1].lower(): m for m in ENABLED_MARKETS}
 
-#def get_market_context(country):
-#    country = country.lower()
-#    markets = get_enabled_markets()
-#
-#    if country not in markets:
-#        abort(404)
-#
-#    marketplaces = [markets[country]]
-#
-#    return country, marketplaces
-#
-#def get_country_context_or_404(country):
-#    """
-#    Normalize/validate country using your existing market context helper.
-#    Returns: (country, marketplaces)
-#    """
-#    return get_market_context(country)
 
-def db_query(marketplaces):
-    return (Listing.query
-            .filter(
-                Listing.status == "ACTIVE",
-                Listing.marketplace.in_(marketplaces),
-            ))
-    
+def db_query(marketplaces, set_num=None):
+    query = (
+        Listing.query
+        .filter(
+            Listing.status == "ACTIVE",
+            Listing.marketplace.in_(marketplaces),
+        )
+    )
+
+    if set_num:
+        query = query.filter(Listing.set_num == set_num)
+
+    return query
+   
 #overview logic
 def db_overview(marketplaces):
 
@@ -200,7 +190,7 @@ def drops_query(marketplaces):
     )
 
 # models logic
-def model_query(marketplaces):
+"""def model_query(marketplaces):
     return (
         db.session.query(
             Listing.set_num,
@@ -213,6 +203,31 @@ def model_query(marketplaces):
         )
         .filter(Listing.set_num.isnot(None))
         .group_by(Listing.set_num)
+        .order_by(func.count(Listing.id).desc())
+        .all()
+    )"""
+
+def model_query(marketplaces):
+    return (
+        db.session.query(
+            Listing.set_num,
+            LegoSet.name.label("name"),
+            LegoSet.theme_id.label("theme_id"),
+            func.count(Listing.id).label("count"),
+            func.max(Listing.last_seen).label("last_seen"),
+        )
+        .join(LegoSet, Listing.set_num == LegoSet.base_set_num)
+        .join(Theme, LegoSet.theme_id == Theme.id)
+        .filter(
+            Listing.status == "ACTIVE",
+            Listing.marketplace.in_(marketplaces)
+        )
+        .group_by(
+            Listing.set_num,
+            LegoSet.name,
+            LegoSet.theme_id,
+            Theme.name.label("theme_name"),
+        )
         .order_by(func.count(Listing.id).desc())
         .all()
     )

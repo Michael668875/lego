@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+{% import "macros.html" as macro %}
+
+{% block content %}
+
+<h1>{{ theme.name }}</h1>
+
+{% for lego_set in sets %}
+    <div>
+        <a href="{{ url_for('main.set_page',
+                            country=g.country.lower(),
+                            base_set=lego_set.base_set_num) }}">
+            {{ lego_set.name }}
+        </a>
+    </div>
+{% endfor %}
+
+{% endblock %}

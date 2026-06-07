@@ -1,8 +1,9 @@
 from flask import Blueprint, render_template, redirect, url_for, g, request, abort, Response
 from datetime import datetime, timezone
 from app.route_helpers import *
-from app.models import LegoSet
 from functools import wraps
+from collections import defaultdict
+
 
 
 bp = Blueprint("main", __name__)
@@ -107,6 +108,44 @@ def listings(country):
         listings=listings,
     )
 
+@bp.route("/<country>/<set_num>")
+def set_list(country, set_num):
+
+    listings = db_query(g.marketplaces, set_num)
+
+    return render_template(
+        "set_type.html",
+        listings=listings,
+        set_num=set_num,
+    )
+
+@bp.route("/<country>/theme/<int:theme_id>")
+def theme_sets(country, theme_id):
+
+    theme = Theme.query.get_or_404(theme_id)
+
+    sets = (
+        db.session.query(LegoSet)
+        .join(
+            Listing,
+            Listing.set_num == LegoSet.base_set_num
+        )
+        .filter(
+            LegoSet.theme_id == theme_id,
+            Listing.status == "ACTIVE",
+            Listing.marketplace.in_(g.marketplaces),
+        )
+        .distinct()
+        .order_by(LegoSet.year.desc())
+        .all()
+    )
+    
+    return render_template(
+        "theme_sets.html",
+        theme=theme,
+        sets=sets,
+    )
+
 @bp.route("/<country>/overview")
 def overview(country):
     
@@ -142,11 +181,16 @@ def price_drops(country):
 @bp.route("/<country>/models")
 def models(country):    
 
-    models = model_query(g.marketplaces)
+    rows = model_query(g.marketplaces)
+
+    grouped = defaultdict(list)
+
+    for row in rows:
+        grouped[row.theme_id].append(row)
 
     return render_template(
         "models.html",
-        models=models,
+        grouped_models=grouped,
     )
 
 @bp.route("/<country>/set/<base_set>")

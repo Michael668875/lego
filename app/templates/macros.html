@@ -137,7 +137,7 @@
             </td>
             <td>{{ listing.condition }}</td>
             <td>{{ currency }}  ${{ listing.price }}</td>
-            <td><a href="{{ listing.affiliate_url }}" target="_blank">See it on eBay</a></td>
+            <td><a href="{{ listing.affiliate_url }}" class="btn btn-primary text-nowrap" target="_blank">Buy on eBay</a></td>
             </tr>
           {% endfor %}
           {% else %}
@@ -171,7 +171,14 @@
           {% for result in results %}
             <tr>
             <td>
-                <div class="fw-semibold">{{ result.set_num if result.set_num else "-" }}</div>
+                <div class="fw-semibold">
+                  {% if result.set_num %}
+                      <a href="{{ url_for('main.set_page', base_set=result.set_num, country=g.country ) }}">{{ result.set_num }}</a>
+                      {% else %}
+                      -
+                      {% endif %}
+                </div>
+                
             </td>
             <td>{{ currency }}  ${{ result.Listing.price }}</td>
             <td>{{ result.count }}</td>
@@ -210,7 +217,13 @@
           {% for listing in listings %}
             <tr>
             <td>
-                <div class="fw-semibold">{{ listing.Listing.set_num if listing.Listing.set_num else "-" }}</div>
+                <div class="fw-semibold">
+                  {% if listing.Listing.set_num %}
+                      <a href="{{ url_for('main.set_page', base_set=listing.Listing.set_num, country=g.country ) }}">{{ listing.Listing.set_num }}</a>
+                      {% else %}
+                      -
+                      {% endif %}
+                </div>
             </td>
             <td>{{ currency }}  {{ helpers.price_display(listing.Listing.price, currency, show_code=False) }}</td>
             <td>{{ helpers.price_display(listing.avg_price, currency, show_code=False) }}</td>
@@ -251,7 +264,13 @@
           {% for row in rows %}
             <tr>
             <td>
-                <div class="fw-semibold">{{ row.set_num if row.set_num else "-" }}</div>
+                <div class="fw-semibold">
+                  {% if row.set_num %}
+                      <a href="{{ url_for('main.set_page', base_set=row.set_num, country=g.country ) }}">{{ row.set_num }}</a>
+                      {% else %}
+                      -
+                      {% endif %}
+                </div>
             </td>
             <td>{{ row.old_price }}</td>
             <td>{{ row.new_price }}</td>
@@ -271,26 +290,34 @@
 {% endmacro %}
 
 
-{% macro models_table(models, country) %}
+{% macro models_table(grouped_models, country) %}
 
-  {% if models %}
-  {% for model in models %}
-        
-        <div class="model-grid">
-            <div class="model-chip">{{ model.set_num }} 
-              {% if model.last_seen %}
-                <small class="model-last-seen">Seen {{ model.last_seen|timeago }}</small>
-              {% else %}
-                <small class="model-last-seen">Not Seen</small>
-              {% endif %}
-            </div>
-        </div>
+<div class="series-nav">
+  {% for theme, models in grouped_models.items() %}
+    <a href="#theme-{{ theme }}">{{ theme }}</a>
   {% endfor %}
-  {% else %}
-            <tr>
-                <td colspan="5">No models found.</td>
-            </tr>
-  {% endif %}
+</div>
+
+{% for theme, models in grouped_models.items() %}
+  <section id="theme-{{ theme }}" class="model-series">
+    <h2>{{ theme }}</h2>
+
+    <div class="model-grid">
+      {% for model in models %}
+        <div class="model-chip">
+          {{ model.set_num }} {{ model.name }}
+
+          {% if model.last_seen %}
+            <small class="model-last-seen">
+              Seen {{ model.last_seen|timeago }}
+            </small>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+{% endfor %}
+
 {% endmacro %}
 
 {% macro set_hero(set_data, stats=None, currency=None) %}
@@ -417,20 +444,25 @@
                 <!-- actions -->
                 <div class="mt-auto d-flex gap-2 flex-wrap">
 
-                    <a
-                        href="#listings"
-                        class="btn btn-primary"
-                    >
-                        View Listings
-                    </a>
+                   
+                    {% if set_data.base_set_num %}
+                          <a href="{{ url_for('main.set_list',
+                            country=g.country.lower(),
+                            set_num=set_data.base_set_num) }}"
+                           class="btn btn-primary">View Listings</a>
+                        {% else %}
+                        -
+                        {% endif %}
 
                     {% if set_data.theme %}
-                    <a
-                        href="#listings"
-                        class="btn btn-outline-secondary"
-                    >
-                        More {{ set_data.theme.name }}
-                    </a>
+                        <a
+                            href="{{ url_for('main.theme_sets',
+                                country=g.country.lower(),
+                                theme_id=set_data.theme_id) }}"
+                            class="btn btn-outline-secondary"
+                        >
+                            More {{ set_data.theme.name }}
+                        </a>
                     {% endif %}
 
                 </div>
