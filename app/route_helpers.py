@@ -158,6 +158,7 @@ def drops_query(marketplaces):
     return (
         db.session.query(
             price_changes_subq.c.set_num,
+            LegoSet.name.label("canon_name"),
             price_changes_subq.c.title,
 
             price_changes_subq.c.ebay_item_id,
@@ -180,6 +181,10 @@ def drops_query(marketplaces):
 
             price_changes_subq.c.currency,
             price_changes_subq.c.affiliate_url,
+        )
+        .outerjoin(
+            LegoSet,
+            LegoSet.base_set_num == price_changes_subq.c.set_num
         )
         # remove filter for debuggin. restore later
         #.filter( 

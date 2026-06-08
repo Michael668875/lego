@@ -32,16 +32,44 @@
               BrickDrops
             </span>
             <div class="ms-3">{{ country_select(country, country_flags) }}</div>
+            <div class="ms-3">{{ search_bar() }}</div>
 
             <div class="ms-auto">
-              <a class="menu-link" href="{{ url_for('main.listings', country=country) }}">Home</a>
-              <a class="menu-link" href="{{ url_for('main.overview', country=country) }}">Overview</a>
-              <a class="menu-link" href="{{ url_for('main.best_deals', country=country) }}">Best Deals</a>
-              <a class="menu-link" href="{{ url_for('main.price_drops', country=country) }}">Price Drops</a>
-              <a class="menu-link" href="{{ url_for('main.models', country=country) }}">Available Models</a>
+              <a class="menu-link btn btn-light mx-0" href="{{ url_for('main.listings', country=country) }}">Home</a>
+              <a class="menu-link btn btn-light mx-0" href="{{ url_for('main.overview', country=country) }}">Overview</a>
+              <a class="menu-link btn btn-light mx-0" href="{{ url_for('main.best_deals', country=country) }}">Best Deals</a>
+              <a class="menu-link btn btn-light mx-0" href="{{ url_for('main.price_drops', country=country) }}">Price Drops</a>
+              <a class="menu-link btn btn-light mx-0" href="{{ url_for('main.models', country=country) }}">Available Models</a>
             </div>
           </div>
         </nav>
+{% endmacro %}
+
+{% macro search_bar() %}
+
+<div class="search-wrap ms-auto">
+  <form
+    class="d-flex"
+    method="get"
+    action="{{ url_for('main.search', country=nav_country.lower()) }}"
+  >
+    <input
+      class="form-control me-2"
+      type="search"
+      name="q"
+      placeholder="Search LEGO sets"
+      aria-label="Search LEGO sets"
+      required
+    >
+    <button
+      class="btn btn-outline-danger flex-shrink-0"
+      type="submit"
+    >
+      Search
+    </button>
+  </form>
+</div>
+
 {% endmacro %}
 
 {% macro hero() %}
@@ -161,6 +189,7 @@
         <thead>
             <tr>
             <th>Set</th>
+            <th>Title</th>
             <th>Starting From</th>
             <th>Number of Listings</th>
             </tr>
@@ -180,6 +209,12 @@
                 </div>
                 
             </td>
+            <td> {% if result.Listing.lego_set.name %}
+                {{ result.Listing.lego_set.name }}  
+              {% else %}
+                -
+              {% endif %}
+             </td>
             <td>{{ currency }}  ${{ result.Listing.price }}</td>
             <td>{{ result.count }}</td>
             </tr>
@@ -205,6 +240,7 @@
         <thead>
             <tr>
             <th>Set</th>
+            <th>Title</th>
             <th>Price</th>
             <th>Market Average</th>
             <th>Discount</th>
@@ -224,6 +260,13 @@
                       -
                       {% endif %}
                 </div>
+            </td>
+            <td>
+              {% if listing.Listing.lego_set.name %}
+                {{ listing.Listing.lego_set.name }}  
+              {% else %}
+                -
+              {% endif %}
             </td>
             <td>{{ currency }}  {{ helpers.price_display(listing.Listing.price, currency, show_code=False) }}</td>
             <td>{{ helpers.price_display(listing.avg_price, currency, show_code=False) }}</td>
@@ -252,6 +295,7 @@
         <thead>
             <tr>
             <th>Set</th>
+            <th>Title</th>
             <th>Old Price</th>
             <th>New Price</th>
             <th>Discount</th>
@@ -271,6 +315,9 @@
                       -
                       {% endif %}
                 </div>
+            </td>
+            <td>
+              {{ row.canon_name or "-" }}
             </td>
             <td>{{ row.old_price }}</td>
             <td>{{ row.new_price }}</td>

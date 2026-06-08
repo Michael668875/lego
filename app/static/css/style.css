@@ -280,11 +280,11 @@
     background-color: white;
     color: #656565;
     border: 2px solid;
-    border-color: #b71c1c;
+    border-color: #da2323;
 }
 
 .country-btn:hover {
-    background-color: #b71c1c;
+    background-color: #da2323;
     color: white;
 }
 
@@ -303,4 +303,9 @@
 .text-secondary a:hover {
   color: #e00d0d;
   text-decoration: none;
+}
+
+.form-control {
+  border: 1px solid;
+  border-color: red;
 }

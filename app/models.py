@@ -72,6 +72,13 @@ class Listing(db.Model):
         cascade="all, delete-orphan"
     )
 
+    lego_set = db.relationship(
+        "LegoSet",
+        primaryjoin="foreign(Listing.set_num) == LegoSet.base_set_num",
+        viewonly=True,
+        uselist=False
+    )
+
 class PriceHistory(db.Model):
     __tablename__ = "price_history"
 

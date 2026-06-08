@@ -4,6 +4,7 @@ from app.route_helpers import *
 from functools import wraps
 from collections import defaultdict
 from slugify import slugify
+from sqlalchemy import or_
 
 bp = Blueprint("main", __name__)
 
@@ -245,6 +246,36 @@ def set_page(country, base_set):
         "set_page.html",
         set_data=set_data,
         stats=stats,
+    )
+
+@bp.route("/<country>/search")
+def search(country):
+
+    q = request.args.get("q", "").strip()
+
+    if not q:
+        return render_template(
+            "search_results.html",
+            results=[],
+            query=q
+        )
+
+    results = (
+        LegoSet.query
+        .filter(
+            db.or_(
+                LegoSet.base_set_num.ilike(f"%{q}%"),
+                LegoSet.name.ilike(f"%{q}%")
+            )
+        )
+        .order_by(LegoSet.year.desc())
+        .all()
+    )
+
+    return render_template(
+        "search_results.html",
+        results=results,
+        query=q
     )
 
 @bp.route("/<country>/about")

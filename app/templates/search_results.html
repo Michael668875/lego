@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<h1>Search Results</h1>
+
+<p>{{ results|length }} result(s) for "{{ query }}"</p>
+
+{% if results %}
+
+    <ul>
+    {% for set in results %}
+        <li>
+            <a href="{{ url_for(
+                'main.set_page',
+                country=g.country.lower(),
+                base_set=set.base_set_num
+            ) }}">
+                {{ set.base_set_num }} -
+                {{ set.name }}
+                ({{ set.year }})
+            </a>
+        </li>
+    {% endfor %}
+    </ul>
+
+{% else %}
+
+    <p>No matching sets found.</p>
+
+{% endif %}
+
+{% endblock %}
