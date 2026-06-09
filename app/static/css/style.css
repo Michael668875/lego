@@ -109,6 +109,11 @@
       color: white;
     }
 
+    .brand-logo {
+      text-decoration: none;
+      color: #d01012;
+    }
+
     /* Model Grid */
     /* Responsive grid */
 .model-menu {
@@ -308,4 +313,16 @@
 .form-control {
   border: 1px solid;
   border-color: red;
+}
+
+.fit-text {
+  font-size: clamp(1rem, 2.2vw, 2rem);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.specials {
+  text-decoration: none;
+  color: #111827;
 }

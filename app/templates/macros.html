@@ -29,7 +29,9 @@
 <nav class="navbar navbar-expand-lg navbar-custom px-4 py-3">
           <div class="container-fluid d-flex align-items-center">
             <span class="navbar-brand fw-bold fs-4 text-danger">
+              <a class="brand-logo" href="{{ url_for('main.listings', country=g.country) }}">
               BrickDrops
+              </a>
             </span>
             <div class="ms-3">{{ country_select(country, country_flags) }}</div>
             <div class="ms-3">{{ search_bar() }}</div>
@@ -88,9 +90,11 @@
                   Browse thousands of listings with pricing insights and collector trends.
                 </p>
 
+                <a href="{{ url_for('main.models', country=g.country ) }}">
                 <button class="btn btn-dark btn-lg">
                   Browse Sets
                 </button>
+              </a>
               </div>
 
               <div class="col-lg-5 mt-4 mt-lg-0">
@@ -101,29 +105,44 @@
           </div>
 {% endmacro %}
 
-{% macro specials() %}
-          <div class="row g-4 mb-4">
-            <div class="col-md-4">
-              <div class="stat-card shadow-sm p-4">
-                <div class="text-secondary mb-2">New Listings</div>
-                <div class="display-6 fw-bold">1,289</div>
-              </div>
-            </div>
+{% macro specials(active_listings, top_theme, top_theme_id, best_deals_count) %}
 
-            <div class="col-md-4">
-              <div class="stat-card shadow-sm p-4">
-                <div class="text-secondary mb-2">Trending Theme</div>
-                <div class="display-6 fw-bold">Star Wars</div>
-              </div>
-            </div>
+  <div class="row g-4 mb-4">
 
-            <div class="col-md-4">
-              <div class="stat-card shadow-sm p-4">
-                <div class="text-secondary mb-2">Average Deal</div>
-                <div class="display-6 fw-bold">15% Off</div>
-              </div>
-            </div>
-          </div>
+  <div class="col-md-4">
+    <a class="specials" href="{{ url_for('main.overview', country=g.country) }}">
+    <div class="stat-card shadow-sm p-4">
+      <div class="text-secondary mb-2">Active Listings</div>
+      <div class="display-6 fw-bold">
+        {{ "{:,}".format(active_listings) }}
+      </div>
+    </div>
+  </a>
+  </div>
+
+  <div class="col-md-4">
+    <a class="specials" href="{{ url_for('main.theme_sets', country=g.country, theme_id=top_theme_id) }}">
+    <div class="stat-card shadow-sm p-4">
+      <div class="text-secondary mb-2">Top Theme</div>
+      <div class="display-6 fw-bold text-truncate fit-text">
+        {{ top_theme }}
+      </div>
+    </div>
+    </a>
+  </div>
+
+  <div class="col-md-4">
+    <a class="specials" href="{{ url_for('main.best_deals', country=g.country) }}">
+    <div class="stat-card shadow-sm p-4">
+      <div class="text-secondary mb-2">Best Deals Available</div>
+      <div class="display-6 fw-bold">
+        {{ "{:,}".format(best_deals_count) }}
+      </div>
+    </div>
+    </a>
+  </div>
+
+</div>
 
 {% endmacro %}
 
@@ -137,7 +156,7 @@
             <tr>
             <th>Set</th>
             <th>Condition</th>
-            <th>Price</th>
+            <th>Price <small>{{ currency }}</small></th>
             <th>Url</th>
             </tr>
         </thead>
@@ -152,19 +171,19 @@
                     src="{{ listing.image_urls[0] }}">
                 <div>
                     <div class="fw-semibold">{{ listing.title }}</div>
-                    <small class="text-secondary">
+                    <span class="text-secondary">
                       {% if listing.set_num %}
                       <a href="{{ url_for('main.set_page', base_set=listing.set_num, country=g.country ) }}">{{ listing.set_num }}</a>
                       {% else %}
                       -
                       {% endif %}
                     
-                    </small>
+                    </span>
                 </div>
                 </div>
             </td>
             <td>{{ listing.condition }}</td>
-            <td>{{ currency }}  ${{ listing.price }}</td>
+            <td>{{ helpers.price_display(listing.price, currency, show_code=False) }}</td>
             <td><a href="{{ listing.affiliate_url }}" class="btn btn-primary text-nowrap" target="_blank">Buy on eBay</a></td>
             </tr>
           {% endfor %}
@@ -215,8 +234,15 @@
                 -
               {% endif %}
              </td>
-            <td>{{ currency }}  ${{ result.Listing.price }}</td>
-            <td>{{ result.count }}</td>
+            <td>{{ helpers.price_display(result.Listing.price, currency, show_code=False) }}</td>
+            <td>
+              <a href="{{ url_for('main.set_list', country=g.country, set_num=result.Listing.set_num) }}">
+
+                <span class="btn btn-outline-danger px-5">
+                  {{ result.count }}
+                </span>
+              </a>
+            </td>
             </tr>
           {% endfor %}
           {% else %}
@@ -241,7 +267,7 @@
             <tr>
             <th>Set</th>
             <th>Title</th>
-            <th>Price</th>
+            <th>Price <small>{{ currency }}</small></th>
             <th>Market Average</th>
             <th>Discount</th>
             <th>Listing</th>
@@ -268,10 +294,10 @@
                 -
               {% endif %}
             </td>
-            <td>{{ currency }}  {{ helpers.price_display(listing.Listing.price, currency, show_code=False) }}</td>
+            <td>{{ helpers.price_display(listing.Listing.price, currency, show_code=False) }}</td>
             <td>{{ helpers.price_display(listing.avg_price, currency, show_code=False) }}</td>
             <td>{{ ((listing.avg_price - listing.Listing.price) / listing.avg_price * 100)|round(1) }}%</td>
-            <td><a href="{{ listing.affiliate_url }}" target="_blank">See it on eBay</a></td>
+            <td><a href="{{ listing.affiliate_url }}" class="btn btn-primary text-nowrap" target="_blank">Buy on eBay</a></td>
             </tr>
           {% endfor %}
           {% else %}
@@ -319,10 +345,22 @@
             <td>
               {{ row.canon_name or "-" }}
             </td>
-            <td>{{ row.old_price }}</td>
-            <td>{{ row.new_price }}</td>
+            <td>
+              {%  if row.old_price %}
+                {{ helpers.price_display(row.old_price, currency, show_code=False) }}
+              {% else %}
+                -
+              {% endif %}
+            </td>
+            <td>
+              {%  if row.new_price %}
+                {{ helpers.price_display(row.new_price, currency, show_code=False) }}
+              {% else %}
+                -
+              {% endif %}
+            </td>
             <td>{{ row.discount_percent|round(0)|int if row.discount_percent else "0" }}%</td>
-            <td><a href="{{ row.affiliate_url }}" target="_blank">See it on eBay</a></td>
+            <td><a href="{{ row.affiliate_url }}" class="btn btn-primary text-nowrap" target="_blank">Buy on eBay</a></td>
             </tr>
           {% endfor %}
           {% else %}
@@ -470,7 +508,7 @@
                         </div>
                         <div class="fw-semibold">
                             {% if stats.cheapest_price %}
-                                {{ currency }} ${{ stats.cheapest_price }}
+                                {{ currency }} {{ helpers.price_display(stats.cheapest_price, currency, show_code=False) }}
                             {% else %}
                                 -
                             {% endif %}

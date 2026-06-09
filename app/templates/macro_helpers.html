@@ -11,3 +11,13 @@
         {% endif %}
     </span>
 {% endmacro %}
+
+{% macro price_heading(currency='') %}
+{% set code = (currency or '').upper() %}
+<span class="price-heading-wrap">
+        <span>Price</span>
+        {% if code %}
+            <span class="price-heading-code">{{ code }}</span>
+            {% endif %}
+    </span>
+{% endmacro %}

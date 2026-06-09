@@ -41,6 +41,76 @@ def db_query(marketplaces, set_num=None):
         query = query.filter(Listing.set_num == set_num)
 
     return query
+
+# stats for homepage
+def homepage_stats(marketplaces):
+
+    # Active listings
+    active_listings = (
+        Listing.query
+        .filter(
+            Listing.status == "ACTIVE",
+            Listing.marketplace.in_(marketplaces)
+        )
+        .count()
+    )
+
+    # Top theme
+    top_theme = (
+        db.session.query(
+            Theme.id,
+            Theme.name,
+            func.count(Listing.id).label("listing_count")
+        )
+        .join(LegoSet, LegoSet.theme_id == Theme.id)
+        .join(
+            Listing,
+            Listing.set_num == LegoSet.base_set_num
+        )
+        .filter(
+            Listing.status == "ACTIVE",
+            Listing.marketplace.in_(marketplaces)
+        )
+        .group_by(Theme.id, Theme.name)
+        .order_by(func.count(Listing.id).desc())
+        .first()
+    )
+
+    # Best deals available
+    avg_subquery = (
+        db.session.query(
+            Listing.set_num.label("set_num"),
+            func.avg(Listing.price).label("avg_price")
+        )
+        .filter(
+            Listing.marketplace.in_(marketplaces),
+            Listing.status == "ACTIVE",
+            Listing.set_num.isnot(None)
+        )
+        .group_by(Listing.set_num)
+        .subquery()
+    )
+
+    best_deals_count = (
+        db.session.query(Listing.id)
+        .join(
+            avg_subquery,
+            Listing.set_num == avg_subquery.c.set_num
+        )
+        .filter(
+            Listing.marketplace.in_(marketplaces),
+            Listing.status == "ACTIVE",
+            Listing.price <= avg_subquery.c.avg_price * 0.75
+        )
+        .count()
+    )
+
+    return {
+        "active_listings": active_listings,
+        "top_theme": top_theme.name if top_theme else "N/A",
+        "top_theme_id": top_theme.id if top_theme else None,
+        "best_deals_count": best_deals_count
+    }
    
 #overview logic
 def db_overview(marketplaces):
@@ -106,7 +176,7 @@ def bestdeals_listings(marketplaces):
         )
         .filter(Listing.marketplace.in_(marketplaces))
         .filter(Listing.status == "ACTIVE")
-        .filter(Listing.price <= avg_subquery.c.avg_price * 1) #1 for debugging. set to 0.75 later
+        .filter(Listing.price <= avg_subquery.c.avg_price * 0.75) 
         .order_by(
             (
                 (avg_subquery.c.avg_price - Listing.price)
@@ -186,32 +256,15 @@ def drops_query(marketplaces):
             LegoSet,
             LegoSet.base_set_num == price_changes_subq.c.set_num
         )
-        # remove filter for debuggin. restore later
-        #.filter( 
-        #    price_changes_subq.c.old_price.isnot(None),
-        #    price_changes_subq.c.new_price < price_changes_subq.c.old_price,
-        #)
+         # remove filter for debuggin. restore later
+        .filter( 
+            price_changes_subq.c.old_price.isnot(None),
+            price_changes_subq.c.new_price < price_changes_subq.c.old_price,
+        )
         .all()
     )
 
 # models logic
-"""def model_query(marketplaces):
-    return (
-        db.session.query(
-            Listing.set_num,
-            func.count(Listing.id).label("count"),
-            func.max(Listing.last_seen).label("last_seen"),
-        )
-        .filter(
-            Listing.status == "ACTIVE",
-            Listing.marketplace.in_(marketplaces)
-        )
-        .filter(Listing.set_num.isnot(None))
-        .group_by(Listing.set_num)
-        .order_by(func.count(Listing.id).desc())
-        .all()
-    )"""
-
 def model_query(marketplaces):
     return (
         db.session.query(

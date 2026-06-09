@@ -6,6 +6,7 @@ from collections import defaultdict
 from slugify import slugify
 from sqlalchemy import or_
 
+
 bp = Blueprint("main", __name__)
 
 @bp.app_errorhandler(404)
@@ -103,9 +104,15 @@ def listings(country):
 
     listings = page_nums(query)
 
+    stats = homepage_stats(g.marketplaces)
+
     return render_template(
         "listings.html",
         listings=listings,
+        active_listings=stats["active_listings"],
+        top_theme=stats["top_theme"],
+        top_theme_id=stats["top_theme_id"],
+        best_deals_count=stats["best_deals_count"]
     )
 
 @bp.route("/<country>/<set_num>")
@@ -177,24 +184,6 @@ def price_drops(country):
         "price_drops.html",
         rows=rows,
     )
-
-"""@bp.route("/<country>/models")
-def models(country):
-
-    rows = model_query(g.marketplaces)
-
-    grouped = defaultdict(list)
-    theme_names = {}
-
-    for row in rows:
-        grouped[row.theme_id].append(row)
-        theme_names[row.theme_id] = row.theme_name
-
-    return render_template(
-        "models.html",
-        grouped_models=grouped,
-        theme_names=theme_names,
-    )"""
 
 
 @bp.route("/<country>/models")
@@ -310,3 +299,11 @@ def contact(country):
     return render_template("contact.html")
 
 
+@bp.route("/sitemap.xml")
+def sitemap():
+    return redirect(
+        url_for(
+            "static",
+            filename="sitemaps/sitemap.xml"
+        )
+    )
