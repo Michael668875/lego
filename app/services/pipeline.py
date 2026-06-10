@@ -1,7 +1,7 @@
 from app.extensions import db
 from sqlalchemy import text
 import re
-from app.models import TempSummaries, Listing
+from app.models import TempSummaries, Listing, LegoSet
 
 from app import create_app
 
@@ -76,9 +76,7 @@ def insert_price_history():
            OR last_ph.currency <> l.currency;
     """))
 
-
-
-def find_set_number(title):
+def find_set_number(title, valid_set_nums):
     """
     Extracts LEGO set numbers like:
     75313
@@ -91,18 +89,24 @@ def find_set_number(title):
 
     if not title:
         return None
+    
+    for num in sorted(valid_set_nums, key=len, reverse=True):
+        if num in title:
+            # extra safety check: ensure it's not part of a larger digit sequence
+            if re.search(rf"(?<!\d){re.escape(num)}(?!\d)", title):
+                return num
 
     patterns = [
-        r"\b(\d{4,6})-\d+\b",  # 75313-1
-        r"\((\d{4,6})\)",      # (75313)
-        r"\bSet\s+(\d{4,6})\b",# Set 75313
-        r"\b(\d{4,6})\b",      # plain 75313
+        r"\b(\d{5,6})-\d+\b",        # 75313-1 (most reliable)
+        r"\bSet\s*#?\s*(\d{5,6})\b", # Set 75313 / Set #75313
+        r"\((\d{5,6})\)",            # (75313)
+        r"\b(\d{5,6})\b",            # fallback ONLY
     ]
 
     for pattern in patterns:
         match = re.search(pattern, title, re.IGNORECASE)
         if match:
-            return int(match.group(1))
+            return match.group(1)
 
     return None
 
@@ -111,6 +115,14 @@ def get_set_nums():
     """
     Updates Listing.set_num using matching TempSummaries titles.
     """
+
+    all_set_nums = {
+        str(s.base_set_num).strip()
+        for s in LegoSet.query.with_entities(LegoSet.base_set_num).all()
+        if s.base_set_num
+        and str(s.base_set_num).isdigit()
+        and len(str(s.base_set_num)) >= 4
+    }
 
     listings = Listing.query.all()
 
@@ -122,10 +134,10 @@ def get_set_nums():
         if not temp:
             continue
 
-        set_num = find_set_number(temp.title)
+        set_num = find_set_number(temp.title, all_set_nums)
 
         if set_num:
-            listing.set_num = set_num
+            listing.set_num = str(set_num)
 
     
 

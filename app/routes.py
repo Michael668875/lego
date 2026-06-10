@@ -1,10 +1,6 @@
-from flask import Blueprint, render_template, redirect, url_for, g, request, abort, Response
+from flask import Blueprint, render_template, redirect, url_for, g, request, send_from_directory, current_app
 from datetime import datetime, timezone
 from app.route_helpers import *
-from functools import wraps
-from collections import defaultdict
-from slugify import slugify
-from sqlalchemy import or_
 
 
 bp = Blueprint("main", __name__)
@@ -121,7 +117,7 @@ def set_list(country, set_num):
     listings = db_query(g.marketplaces, set_num)
 
     return render_template(
-        "set_type.html",
+        "set_list.html",
         listings=listings,
         set_num=set_num,
     )
@@ -131,21 +127,7 @@ def theme_sets(country, theme_id):
 
     theme = Theme.query.get_or_404(theme_id)
 
-    sets = (
-        db.session.query(LegoSet)
-        .join(
-            Listing,
-            Listing.set_num == LegoSet.base_set_num
-        )
-        .filter(
-            LegoSet.theme_id == theme_id,
-            Listing.status == "ACTIVE",
-            Listing.marketplace.in_(g.marketplaces),
-        )
-        .distinct()
-        .order_by(LegoSet.year.desc())
-        .all()
-    )
+    sets = get_sets(theme_id, g.marketplaces)
     
     return render_template(
         "theme_sets.html",
@@ -191,22 +173,7 @@ def models(country):
 
     rows = model_query(g.marketplaces)
 
-    grouped = defaultdict(list)
-    theme_names = {}
-
-    for row in rows:
-        grouped[row.theme_id].append(row)
-        theme_names[row.theme_id] = row.theme_name
-
-    themes = [
-        {
-            "id": theme_id,
-            "name": theme_names[theme_id],
-            "slug": slugify(theme_names[theme_id]),
-            "models": grouped[theme_id],
-        }
-        for theme_id in grouped.keys()
-    ]
+    themes = theme_query(rows)
 
     return render_template(
         "models.html",
@@ -216,20 +183,7 @@ def models(country):
 @bp.route("/<country>/set/<base_set>")
 def set_page(country, base_set):
 
-    set_data = (
-        LegoSet.query
-        .filter_by(base_set_num=str(base_set))
-        .order_by(LegoSet.year.desc())
-        .first_or_404()
-    )
-
-    stats = db.session.query(
-        func.count(Listing.id).label("active_count"),
-        func.min(Listing.price).label("cheapest_price")
-    ).filter(
-        Listing.set_num == base_set,
-        Listing.country == g.country.upper()
-    ).first()
+    set_data, stats = get_set_data(base_set, g.country)
 
     return render_template(
         "set_page.html",
@@ -240,26 +194,9 @@ def set_page(country, base_set):
 @bp.route("/<country>/search")
 def search(country):
 
-    q = request.args.get("q", "").strip()
+    #q, results = search_query()
 
-    if not q:
-        return render_template(
-            "search_results.html",
-            results=[],
-            query=q
-        )
-
-    results = (
-        LegoSet.query
-        .filter(
-            db.or_(
-                LegoSet.base_set_num.ilike(f"%{q}%"),
-                LegoSet.name.ilike(f"%{q}%")
-            )
-        )
-        .order_by(LegoSet.year.desc())
-        .all()
-    )
+    q, results = search_raw()
 
     return render_template(
         "search_results.html",
@@ -306,4 +243,11 @@ def sitemap():
             "static",
             filename="sitemaps/sitemap.xml"
         )
+    )
+
+@bp.route("/robots.txt")
+def robots():
+    return send_from_directory(
+        current_app.static_folder,
+        "robots.txt"
     )

@@ -99,7 +99,7 @@
 
               <div class="col-lg-5 mt-4 mt-lg-0">
                 <img class="img-fluid rounded-4"
-                  src="https://images.unsplash.com/photo-1587654780291-39c9404d746b?q=80&w=800&auto=format&fit=crop">
+                  src="{{ url_for('static', filename='img/lego_bricks.jpg') }}">
               </div>
             </div>
           </div>
@@ -121,14 +121,18 @@
   </div>
 
   <div class="col-md-4">
+    {% if top_theme_id %}
     <a class="specials" href="{{ url_for('main.theme_sets', country=g.country, theme_id=top_theme_id) }}">
+    {% endif %}
     <div class="stat-card shadow-sm p-4">
       <div class="text-secondary mb-2">Top Theme</div>
       <div class="display-6 fw-bold text-truncate fit-text">
         {{ top_theme }}
       </div>
     </div>
+    {%  if top_theme_id %}
     </a>
+    {% endif %}
   </div>
 
   <div class="col-md-4">
@@ -297,7 +301,7 @@
             <td>{{ helpers.price_display(listing.Listing.price, currency, show_code=False) }}</td>
             <td>{{ helpers.price_display(listing.avg_price, currency, show_code=False) }}</td>
             <td>{{ ((listing.avg_price - listing.Listing.price) / listing.avg_price * 100)|round(1) }}%</td>
-            <td><a href="{{ listing.affiliate_url }}" class="btn btn-primary text-nowrap" target="_blank">Buy on eBay</a></td>
+            <td><a href="{{ listing.Listing.affiliate_url }}" class="btn btn-primary text-nowrap" target="_blank">Buy on eBay</a></td>
             </tr>
           {% endfor %}
           {% else %}

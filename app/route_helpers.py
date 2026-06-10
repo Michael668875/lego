@@ -1,9 +1,11 @@
-from flask import abort, request
-from sqlalchemy import func
+from flask import abort, request, render_template
+from sqlalchemy import func, exists, case, desc
 from app.models import Listing, PriceHistory, LegoSet, Theme
 from app.extensions import db
-
-
+from collections import defaultdict
+from functools import wraps
+from slugify import slugify
+from sqlalchemy import or_
 
 
 
@@ -291,9 +293,124 @@ def model_query(marketplaces):
         .all()
     )
 
+def theme_query(rows):
+
+    grouped = defaultdict(list)
+    theme_names = {}
+
+    for row in rows:
+        grouped[row.theme_id].append(row)
+        theme_names[row.theme_id] = row.theme_name
+
+    themes = [
+        {
+            "id": theme_id,
+            "name": theme_names[theme_id],
+            "slug": slugify(theme_names[theme_id]),
+            "models": grouped[theme_id],
+        }
+        for theme_id in grouped.keys()
+    ]
+    return themes
+
 # Pagination
 def page_nums(query, pages = 50):
     page = request.args.get("page", 1, type=int)
     per_page = pages  
     pagination = query.paginate(page=page, per_page=per_page, error_out=False)
     return pagination.items
+
+def get_sets(theme_id, marketplaces):
+    return (
+        db.session.query(LegoSet)
+        .join(
+            Listing,
+            Listing.set_num == LegoSet.base_set_num
+        )
+        .filter(
+            LegoSet.theme_id == theme_id,
+            Listing.status == "ACTIVE",
+            Listing.marketplace.in_(marketplaces),
+        )
+        .distinct()
+        .order_by(LegoSet.year.desc())
+        .all()
+    )
+
+def get_set_data(base_set, country):
+
+    set_data = (
+            LegoSet.query
+            .filter_by(base_set_num=str(base_set))
+            .order_by(LegoSet.year.desc())
+            .first_or_404()
+        )
+
+    stats = db.session.query(
+        func.count(Listing.id).label("active_count"),
+        func.min(Listing.price).label("cheapest_price")
+    ).filter(
+        Listing.set_num == base_set,
+        Listing.country == country.upper()
+    ).first()
+
+    return set_data, stats
+
+def search_query():
+    q = request.args.get("q", "").strip()
+
+    if not q:
+        return render_template(
+            "search_results.html",
+            results=[],
+            query=q
+        )
+
+    raw_results = (
+        LegoSet.query
+        .filter(
+            db.exists().where(
+                (Listing.set_num == LegoSet.base_set_num) &
+                (Listing.status == "ACTIVE")
+            )
+        )
+        .filter(
+            db.or_(
+                LegoSet.base_set_num.ilike(f"%{q}%"),
+                LegoSet.name.ilike(f"%{q}%"),
+                Theme.name.ilike(f"%{q}%")
+            )
+        )
+        .join(Theme)
+        .distinct()
+        .add_columns(
+            case(
+                (LegoSet.base_set_num.ilike(q), 100),
+                (LegoSet.base_set_num.ilike(f"%{q}%"), 80),
+                (LegoSet.name.ilike(f"%{q}%"), 50),
+                (Theme.name.ilike(f"%{q}%"), 30),
+                else_=0
+            ).label("score")
+        )
+        .order_by(LegoSet.year.desc())
+        .all()
+    )
+
+    results = [legoset for legoset, score in raw_results]
+    print(raw_results)
+    return q, results
+
+def search_raw():
+    q = request.args.get("q", "").strip()
+    raw_results = (
+        Listing.query
+        .with_entities(Listing.title)
+        .filter(Listing.status == "ACTIVE")
+        .filter(
+            Listing.title.ilike(f"%{q}%")
+        )
+        .all()
+    )
+    results = [r[0] for r in raw_results]
+    print(results)
+    return q, results
