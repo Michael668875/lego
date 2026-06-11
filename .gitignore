@@ -6,3 +6,4 @@ instance/
 *.csv
 venv/
 pics/
+*.xml

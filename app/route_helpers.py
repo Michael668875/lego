@@ -400,17 +400,3 @@ def search_query():
     print(raw_results)
     return q, results
 
-def search_raw():
-    q = request.args.get("q", "").strip()
-    raw_results = (
-        Listing.query
-        .with_entities(Listing.title)
-        .filter(Listing.status == "ACTIVE")
-        .filter(
-            Listing.title.ilike(f"%{q}%")
-        )
-        .all()
-    )
-    results = [r[0] for r in raw_results]
-    print(results)
-    return q, results

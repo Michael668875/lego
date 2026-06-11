@@ -194,9 +194,7 @@ def set_page(country, base_set):
 @bp.route("/<country>/search")
 def search(country):
 
-    #q, results = search_query()
-
-    q, results = search_raw()
+    q, results = search_query()
 
     return render_template(
         "search_results.html",
