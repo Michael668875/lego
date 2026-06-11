@@ -3,7 +3,7 @@ __pycache__/
 *.pyc
 instance/
 *.json
-*.csv
+
 venv/
 pics/
 *.xml
