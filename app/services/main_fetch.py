@@ -16,7 +16,7 @@ import tempfile
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 LOG_DIR = os.path.join(PROJECT_ROOT, "logs")
 LOG_FILE = os.path.join(LOG_DIR, "main_fetch.log")
-LOCK_FILE = os.path.join(tempfile.gettempdir(), "main_fetch.lock")
+LOCK_FILE = os.path.join(tempfile.gettempdir(), "lego.lock")
 
 
 # Ensure logs directory exists
