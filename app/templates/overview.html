@@ -1,6 +1,12 @@
 {% extends "layout.html" %}
 {% import "macros.html" as macro %}
 
+{% block title %} Overview | BrickDrops{% endblock %}
+
+{% block meta_description %}
+ Find whats currently available. Market overview.
+{% endblock %}
+
 {% block content %}
  
 {{ macro.overview_table(sets, currency) }}

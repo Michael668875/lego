@@ -1,6 +1,12 @@
 {% extends "layout.html" %}
 {% import "macros.html" as macro %}
 
+{% block title %} Available | BrickDrops{% endblock %}
+
+{% block meta_description %}
+See which lego sets are currently listed on BrickDrops.
+{% endblock %}
+
 {% block content %}
 
 {{ macro.models_table(themes, g.country) }}

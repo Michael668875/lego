@@ -1,6 +1,12 @@
 {% extends "layout.html" %}
 {% import "macros.html" as macro %}
 
+{% block title %} {{ theme.name }} | BrickDrops{% endblock %}
+
+{% block meta_description %}
+Current listings for theme {{ theme.name }}
+{% endblock %}
+
 {% block content %}
 
 <h1>{{ theme.name }}</h1>

@@ -1,6 +1,12 @@
 {% extends "layout.html" %}
 {% import "macros.html" as macro %}
 
+{% block title %} Sets | BrickDrops{% endblock %}
+
+{% block meta_description %}
+   List of lego sets.
+{% endblock %}
+
 {% block content %}
 
 {{ macro.listing_table(listings, currency) }}

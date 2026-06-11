@@ -1,6 +1,12 @@
 {% extends "layout.html" %}
 {% import "macros.html" as macro %}
 
+{% block title %} Price Drops | BrickDrops{% endblock %}
+
+{% block meta_description %}
+ Find discounted lego sets.
+{% endblock %}
+
 {% block content %}
 
     {{ macro.price_drops_table(sets, currency) }}
