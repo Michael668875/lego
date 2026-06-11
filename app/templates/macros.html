@@ -300,7 +300,7 @@
             </td>
             <td>{{ helpers.price_display(listing.Listing.price, currency, show_code=False) }}</td>
             <td>{{ helpers.price_display(listing.avg_price, currency, show_code=False) }}</td>
-            <td>{{ ((listing.avg_price - listing.Listing.price) / listing.avg_price * 100)|round(1) }}%</td>
+            <td><span class="discount"> {{ ((listing.avg_price - listing.Listing.price) / listing.avg_price * 100)|round(1) }}% </span></td>
             <td><a href="{{ listing.Listing.affiliate_url }}" class="btn btn-primary text-nowrap" target="_blank">Buy on eBay</a></td>
             </tr>
           {% endfor %}
@@ -363,7 +363,7 @@
                 -
               {% endif %}
             </td>
-            <td>{{ row.discount_percent|round(0)|int if row.discount_percent else "0" }}%</td>
+            <td><span class="discount"> {{ row.discount_percent|round(0)|int if row.discount_percent else "0" }}% </span></td>
             <td><a href="{{ row.affiliate_url }}" class="btn btn-primary text-nowrap" target="_blank">Buy on eBay</a></td>
             </tr>
           {% endfor %}
