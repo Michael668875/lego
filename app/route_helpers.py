@@ -362,6 +362,20 @@ class PaginationWrapper:
     def url_for_page(self, page):
         args = build_pagination_args(page=page)
         return url_for(request.endpoint, **request.view_args, **args)
+    
+    def iter_pages(
+        self,
+        left_edge=1,
+        left_current=2,
+        right_current=2,
+        right_edge=1
+    ):
+        return self.pagination.iter_pages(
+            left_edge=left_edge,
+            left_current=left_current,
+            right_current=right_current,
+            right_edge=right_edge
+        )
 
 
 

@@ -326,3 +326,52 @@
   text-decoration: none;
   color: #111827;
 }
+
+/* pagination */
+
+.pagination-wrap {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 2rem 0;
+    flex-wrap: wrap;
+}
+
+.page-btn {
+    min-width: 42px;
+    height: 42px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    text-decoration: none;
+
+    background: white;
+    color: #111827;
+
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+
+    font-weight: 600;
+
+    transition: all 0.15s ease;
+}
+
+.page-btn:hover {
+    border-color: #d01012;
+    color: #d01012;
+    transform: translateY(-1px);
+}
+
+.page-btn.active {
+    background: #d01012;
+    color: white;
+    border-color: #d01012;
+}
+
+.page-ellipsis {
+    padding: 0 0.5rem;
+    color: #6b7280;
+}

@@ -24,25 +24,38 @@
 
 
 {% macro render_pagination(p) %}
-<nav class="pagination">
+<nav class="pagination-wrap">
 
   {% if p.has_prev %}
-    <a href="{{ p.url_for_page(p.prev_num) }}">Prev</a>
+    <a href="{{ p.url_for_page(p.prev_num) }}" class="page-btn">←</a>
   {% endif %}
 
-  {% for i in range(1, p.pages + 1) %}
+  {% for page in p.iter_pages() %}
 
-    {% if i == p.page %}
-      <span class="active">{{ i }}</span>
+    {% if page %}
+
+      {% if page == p.page %}
+        <span class="active page-btn">{{ page }}</span>
+      {% else %}
+        <a href="{{ p.url_for_page(page) }}" class="page-btn">{{ page }}</a>
+      {% endif %}
+
     {% else %}
-      <a href="{{ p.url_for_page(i) }}">{{ i }}</a>
+
+      <span class="page-ellipsis">…</span>
+
     {% endif %}
 
   {% endfor %}
 
   {% if p.has_next %}
-    <a href="{{ p.url_for_page(p.next_num) }}">Next</a>
+    <a href="{{ p.url_for_page(p.next_num) }}" class="page-btn">→</a>
   {% endif %}
 
 </nav>
 {% endmacro %}
+
+
+
+
+
