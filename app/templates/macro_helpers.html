@@ -21,3 +21,28 @@
             {% endif %}
     </span>
 {% endmacro %}
+
+
+{% macro render_pagination(p) %}
+<nav class="pagination">
+
+  {% if p.has_prev %}
+    <a href="{{ p.url_for_page(p.prev_num) }}">Prev</a>
+  {% endif %}
+
+  {% for i in range(1, p.pages + 1) %}
+
+    {% if i == p.page %}
+      <span class="active">{{ i }}</span>
+    {% else %}
+      <a href="{{ p.url_for_page(i) }}">{{ i }}</a>
+    {% endif %}
+
+  {% endfor %}
+
+  {% if p.has_next %}
+    <a href="{{ p.url_for_page(p.next_num) }}">Next</a>
+  {% endif %}
+
+</nav>
+{% endmacro %}

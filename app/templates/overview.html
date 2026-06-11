@@ -3,6 +3,8 @@
 
 {% block content %}
  
-{{ macro.overview_table(results, currency) }}
+{{ macro.overview_table(sets, currency) }}
+
+{{ helpers.render_pagination(listings)}}
 
 {% endblock %}

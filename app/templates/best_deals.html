@@ -4,7 +4,9 @@
 {% block content %}
 
 
-    {{ macro.best_deals_table(listings, currency) }}
+    {{ macro.best_deals_table(sets, currency) }}
+
+    {{ helpers.render_pagination(listings) }}
 
 
 {% endblock %}

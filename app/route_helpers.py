@@ -1,4 +1,4 @@
-from flask import abort, request, render_template
+from flask import abort, request, render_template, url_for
 from sqlalchemy import func, exists, case, desc
 from app.models import Listing, PriceHistory, LegoSet, Theme
 from app.extensions import db
@@ -37,6 +37,7 @@ def db_query(marketplaces, set_num=None):
             Listing.status == "ACTIVE",
             Listing.marketplace.in_(marketplaces),
         )
+        .order_by(Listing.price.asc(), Listing.id.asc())
     )
 
     if set_num:
@@ -185,8 +186,6 @@ def bestdeals_listings(marketplaces):
                 / avg_subquery.c.avg_price
             ).desc()
         )
-        .limit(100)
-        .all()
     )
 
 
@@ -263,7 +262,6 @@ def drops_query(marketplaces):
             price_changes_subq.c.old_price.isnot(None),
             price_changes_subq.c.new_price < price_changes_subq.c.old_price,
         )
-        .all()
     )
 
 # models logic
@@ -313,12 +311,59 @@ def theme_query(rows):
     ]
     return themes
 
+
 # Pagination
-def page_nums(query, pages = 50):
+def paginate(query, per_page=50):
     page = request.args.get("page", 1, type=int)
-    per_page = pages  
     pagination = query.paginate(page=page, per_page=per_page, error_out=False)
-    return pagination.items
+    return PaginationWrapper(pagination)
+
+def build_pagination_args(**new_args):
+    args = request.args.to_dict(flat=True)
+    args.update(new_args)
+    return args
+
+def page_url(page):
+    args = build_pagination_args(page=page)
+    return url_for(request.endpoint, **request.view_args, **args)
+
+class PaginationWrapper:
+    def __init__(self, pagination):
+        self.pagination = pagination
+
+    @property
+    def items(self):
+        return self.pagination.items
+
+    @property
+    def page(self):
+        return self.pagination.page
+
+    @property
+    def pages(self):
+        return self.pagination.pages
+
+    @property
+    def has_next(self):
+        return self.pagination.has_next
+
+    @property
+    def has_prev(self):
+        return self.pagination.has_prev
+
+    @property
+    def next_num(self):
+        return self.pagination.next_num
+
+    @property
+    def prev_num(self):
+        return self.pagination.prev_num
+
+    def url_for_page(self, page):
+        args = build_pagination_args(page=page)
+        return url_for(request.endpoint, **request.view_args, **args)
+
+
 
 def get_sets(theme_id, marketplaces):
     return (
@@ -336,6 +381,7 @@ def get_sets(theme_id, marketplaces):
         .order_by(LegoSet.year.desc())
         .all()
     )
+
 
 def get_set_data(base_set, country):
 

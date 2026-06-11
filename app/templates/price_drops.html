@@ -3,6 +3,8 @@
 
 {% block content %}
 
-    {{ macro.price_drops_table(rows, currency) }}
+    {{ macro.price_drops_table(sets, currency) }}
+
+    {{ helpers.render_pagination(listings) }}
 
 {% endblock %}

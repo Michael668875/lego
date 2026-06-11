@@ -98,13 +98,14 @@ def listings(country):
 
     query = db_query(g.marketplaces)
 
-    listings = page_nums(query)
+    listings = paginate(query)
 
     stats = homepage_stats(g.marketplaces)
 
     return render_template(
         "listings.html",
         listings=listings,
+        sets=listings.items,
         active_listings=stats["active_listings"],
         top_theme=stats["top_theme"],
         top_theme_id=stats["top_theme_id"],
@@ -140,31 +141,38 @@ def overview(country):
     
     query = db_overview(g.marketplaces)
 
-    results = page_nums(query)
+    listings = paginate(query)
 
     return render_template(
         "overview.html",
-        results=results,
+        listings=listings,
+        sets = listings.items,
     )
 
 @bp.route("/<country>/best_deals")
 def best_deals(country):        
 
-    listings = bestdeals_listings(g.marketplaces)
+    query = bestdeals_listings(g.marketplaces)
+
+    listings = paginate(query)
 
     return render_template(
         "best_deals.html",
         listings=listings,
+        sets=listings.items,
     )
 
 @bp.route("/<country>/drops")
 def price_drops(country):    
 
-    rows = drops_query(g.marketplaces)
+    query = drops_query(g.marketplaces)
+
+    listings = paginate(query)
 
     return render_template(
         "price_drops.html",
-        rows=rows,
+        listings=listings,
+        sets=listings.items,
     )
 
 

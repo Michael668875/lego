@@ -8,6 +8,9 @@
 
             {{ macro.specials(active_listings, top_theme, top_theme_id, best_deals_count) }}
 
-            {{ macro.listing_table(listings, currency) }}         
+            {{ macro.listing_table(sets, currency) }}
+            
+            
+            {{ helpers.render_pagination(listings)}}
 
 {% endblock %}
