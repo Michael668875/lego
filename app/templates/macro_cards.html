@@ -63,6 +63,7 @@
 
 {% macro overview_cards(results, currency) %}
 <div class="mobile-cards">
+    <p class="mobile-title">See which LEGO sets have the most active listings across our marketplace data.</p>
 
 {% for result in results %}
 <div class="listing-card">
@@ -119,7 +120,7 @@
 
 {% macro deal_cards(rows, currency) %}
 <div class="mobile-cards">
-
+<p class="mobile-title">Compare current prices against historical averages to find potential bargains.</p>
 {% for row in rows %}
 <div class="listing-card">
 
@@ -180,7 +181,7 @@
 
 {% macro price_drop_cards(rows, currency) %}
 <div class="mobile-cards">
-
+<p class="mobile-title">Track recent discounts and spot listings that have dropped in price.</p>
 {% for row in rows %}
 <div class="listing-card">
 
@@ -236,3 +237,4 @@
 
 </div>
 {% endmacro %}
+

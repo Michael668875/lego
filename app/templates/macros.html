@@ -207,6 +207,7 @@
 {% macro overview_table(results, currency) %}
 <div class="table-wrap rounded-4 shadow-sm p-4">
     <h3 class="mb-4">Overview</h3>
+    <p>Browse all tracked LEGO sets and see how many active listings are currently available for each set.</p>
 
     <div class="table-responsive">
         <table class="table align-middle">
@@ -270,7 +271,7 @@
 {% macro best_deals_table(listings, currency) %}
 <div class="table-wrap rounded-4 shadow-sm p-4">
     <h3 class="mb-4">Best Deals</h3>
-
+    <p>Find LEGO sets currently selling below their average market price based on tracked listings.</p>
     <div class="table-responsive">
         <table class="table align-middle">
         <thead>
@@ -329,7 +330,7 @@
 {% macro price_drops_table(rows, currency) %}
 <div class="table-wrap rounded-4 shadow-sm p-4">
     <h3 class="mb-4">Price Drops</h3>
-
+    <p>Discover listings that have recently been discounted and may offer better value.</p>
     <div class="table-responsive">
         <table class="table align-middle">
         <thead>
@@ -395,6 +396,14 @@
 
 {% macro models_table(themes, country) %}
 <H1>Available Lego Sets</H1>
+
+<p class="d-none d-md-block">
+    Browse all tracked LEGO sets by theme and set number to find specific models quickly.
+</p>
+
+<p class="d-md-none mobile-title">
+    Explore the complete LEGO set database, organized by theme and set number.
+</p>
 <p>
 
 <div class="series-nav">
