@@ -10,11 +10,11 @@
 {% block content %}
 
    <div class="d-none d-md-block">
-         {{ macro.listing_table(listings, currency) }}
+         {{ macro.listing_table(listings, currency, title="Available Listings") }}
    </div>
 
    <div class="d-block d-md-none">
-         {{ cards.cards(listings) }}
+         {{ cards.cards(listings, title="Available Listings") }}
    </div>
 
 {% endblock %}

@@ -1,10 +1,13 @@
 {% import "macro_helpers.html" as helpers %}
 
-{% macro cards(listings, currency=currency) %}
+{% macro cards(listings, currency=currency, title="Popular Listings") %}
+<div class="mobile-cards">
+    <h3 class="mb-2">{{ title }}</h3>
+    
 
 {% for listing in listings %}
 <div class="listing-card">
-
+    
     {% if listing.image_urls and listing.image_urls[0] %}
     <div class="listing-image">
         <img src="{{ listing.image_urls[0] }}"
@@ -24,6 +27,8 @@
                                 country=g.country) }}">
                 {{ listing.set_num }}
             </a>
+        {% else %}
+            -
         {% endif %}
     </div>
 
@@ -56,13 +61,14 @@
 
 </div>
 {% endfor %}
-
+</div>
 {% endmacro %}
 
 
 
 {% macro overview_cards(results, currency) %}
 <div class="mobile-cards">
+    <h3 class="mb-2">Overview</h3>
     <p class="mobile-title">See which LEGO sets have the most active listings across our marketplace data.</p>
 
 {% for result in results %}
@@ -120,6 +126,7 @@
 
 {% macro deal_cards(rows, currency) %}
 <div class="mobile-cards">
+<h3 class="mb-2">Best Deals</h3>
 <p class="mobile-title">Compare current prices against historical averages to find potential bargains.</p>
 {% for row in rows %}
 <div class="listing-card">
@@ -181,6 +188,7 @@
 
 {% macro price_drop_cards(rows, currency) %}
 <div class="mobile-cards">
+<h3 class="mb-2">Price Drops</h3>
 <p class="mobile-title">Track recent discounts and spot listings that have dropped in price.</p>
 {% if rows %}
     {% for row in rows %}

@@ -151,9 +151,9 @@
 
 {% endmacro %}
 
-{% macro listing_table(listings, currency) %}
+{% macro listing_table(listings, currency, title="Popular Listings") %}
 <div class="table-wrap rounded-4 shadow-sm p-4">
-    <h3 class="mb-4">Popular Listings</h3>
+    <h3 class="mb-4">{{ title }}</h3>
 
     <div class="table-responsive">
         <table class="table align-middle">
