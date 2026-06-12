@@ -173,7 +173,7 @@
             <td>
                 <div class="d-flex align-items-center gap-3">
                 <img class="listing-img"
-                    src="{{ listing.image_urls[0] }}">
+                    src="{{ listing.image_urls[0] }}" loading="lazy">
                 <div>
                     <div class="fw-semibold">{{ listing.title }}</div>
                     <span class="text-secondary">
@@ -233,7 +233,12 @@
                 </div>
                 
             </td>
-            <td> {% if result.Listing.lego_set.name %}
+            <td> 
+              <div class="d-flex align-items-center gap-3">
+                <img class="listing-img"
+                    src="{{ result.Listing.image_urls[0] }}" loading="lazy">
+                <div>
+              {% if result.Listing.lego_set.name %}
                 {{ result.Listing.lego_set.name }}  
               {% else %}
                 -
@@ -293,6 +298,10 @@
                 </div>
             </td>
             <td>
+              <div class="d-flex align-items-center gap-3">
+                <img class="listing-img"
+                    src="{{ listing.Listing.image_urls[0] }}" loading="lazy">
+                <div>
               {% if listing.Listing.lego_set.name %}
                 {{ listing.Listing.lego_set.name }}  
               {% else %}
@@ -348,6 +357,10 @@
                 </div>
             </td>
             <td>
+              <div class="d-flex align-items-center gap-3">
+                <img class="listing-img"
+                    src="{{ row.image_url }}" loading="lazy">
+                <div>
               {{ row.canon_name or "-" }}
             </td>
             <td>
@@ -436,6 +449,7 @@
             {% if set_data.img_url %}
             <img
                 src="{{ set_data.img_url }}"
+                loading="lazy"
                 alt="{{ set_data.name }}"
                 class="img-fluid rounded"
                 style="max-height: 320px;"

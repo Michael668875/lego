@@ -232,6 +232,8 @@ def drops_query(marketplaces):
             LegoSet.name.label("canon_name"),
             price_changes_subq.c.title,
 
+            LegoSet.img_url.label("image_url"),
+
             price_changes_subq.c.ebay_item_id,
 
             price_changes_subq.c.old_price,
