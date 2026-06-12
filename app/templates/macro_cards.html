@@ -182,58 +182,65 @@
 {% macro price_drop_cards(rows, currency) %}
 <div class="mobile-cards">
 <p class="mobile-title">Track recent discounts and spot listings that have dropped in price.</p>
-{% for row in rows %}
-<div class="listing-card">
+{% if rows %}
+    {% for row in rows %}
+    <div class="listing-card">
 
-    {% if row.image_url %}
-        <div class="listing-image">
-            <img src="{{ row.image_url }}"
-                loading="lazy"
-                alt="{{ row.title }}">
+        {% if row.image_url %}
+            <div class="listing-image">
+                <img src="{{ row.image_url }}"
+                    loading="lazy"
+                    alt="{{ row.title }}">
+            </div>
+        {% endif %}
+
+        <div class="listing-title">
+            {{ row.canon_name }}
         </div>
-    {% endif %}
 
-    <div class="listing-title">
-        {{ row.canon_name }}
+        <div class="listing-set">
+            {{ row.set_num }}
+        </div>
+
+        <div class="listing-details">
+
+            <div class="detail-row">
+                <span class="detail-label">Old Price</span>
+                <span>
+                    {{ helpers.price_display(row.old_price, currency, show_code=False) }}
+                </span>
+            </div>
+
+            <div class="detail-row">
+                <span class="detail-label">New Price</span>
+                <span>
+                    {{ helpers.price_display(row.new_price, currency, show_code=False) }}
+                </span>
+            </div>
+
+            <div class="detail-row">
+                <span class="detail-label">Discount</span>
+                <span class="discount">
+                    {{ row.discount_percent|round(0)|int }}%
+                </span>
+            </div>
+
+        </div>
+
+        <a href="{{ row.affiliate_url }}"
+        class="btn btn-primary w-100 mt-3"
+        target="_blank">
+        Buy on eBay
+        </a>
+
     </div>
+    {% endfor %}
 
-    <div class="listing-set">
-        {{ row.set_num }}
+{% else %}
+    <div class="text-center py-4">
+        No listings found.
     </div>
-
-    <div class="listing-details">
-
-        <div class="detail-row">
-            <span class="detail-label">Old Price</span>
-            <span>
-                {{ helpers.price_display(row.old_price, currency, show_code=False) }}
-            </span>
-        </div>
-
-        <div class="detail-row">
-            <span class="detail-label">New Price</span>
-            <span>
-                {{ helpers.price_display(row.new_price, currency, show_code=False) }}
-            </span>
-        </div>
-
-        <div class="detail-row">
-            <span class="detail-label">Discount</span>
-            <span class="discount">
-                {{ row.discount_percent|round(0)|int }}%
-            </span>
-        </div>
-
-    </div>
-
-    <a href="{{ row.affiliate_url }}"
-       class="btn btn-primary w-100 mt-3"
-       target="_blank">
-       Buy on eBay
-    </a>
-
-</div>
-{% endfor %}
+{% endif %}
 
 </div>
 {% endmacro %}
