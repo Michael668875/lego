@@ -9,7 +9,15 @@
 
 {% block content %}
  
-{{ macro.overview_table(sets, currency) }}
+
+
+    <div class="d-none d-md-block">
+        {{ macro.overview_table(sets, currency) }}
+    </div>
+
+    <div class="d-block d-md-none">
+        {{ cards.overview_cards(sets, currency) }}
+    </div>
 
 {{ helpers.render_pagination(listings)}}
 

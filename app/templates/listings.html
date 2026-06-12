@@ -13,7 +13,15 @@ Track LEGO prices, deals, and listings across marketplaces.
 
             {{ macro.specials(active_listings, top_theme, top_theme_id, best_deals_count) }}
 
-            {{ macro.listing_table(sets, currency) }}
+            
+
+            <div class="d-none d-md-block">
+                {{ macro.listing_table(sets, currency) }}
+            </div>
+
+            <div class="d-block d-md-none">
+                {{ cards.cards(sets) }}
+            </div>
             
             
             {{ helpers.render_pagination(listings)}}

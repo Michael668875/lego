@@ -9,7 +9,16 @@
 
 {% block content %}
 
-    {{ macro.price_drops_table(sets, currency) }}
+    
+
+
+    <div class="d-none d-md-block">
+        {{ macro.price_drops_table(sets, currency) }}
+    </div>
+
+    <div class="d-block d-md-none">
+        {{ cards.price_drop_cards(sets, currency) }}
+    </div>
 
     {{ helpers.render_pagination(listings) }}
 
