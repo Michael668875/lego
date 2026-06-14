@@ -5,8 +5,8 @@ from app.extensions import db
 from collections import defaultdict
 from functools import wraps
 from slugify import slugify
-from sqlalchemy import or_
-
+from sqlalchemy import or_, and_
+from sqlalchemy.orm import aliased
 
 
 COUNTRY_FLAGS = {
@@ -192,6 +192,7 @@ def bestdeals_listings(marketplaces):
 
 
 # price drops logic
+
 def drops_query(marketplaces):
 
     ranked = (
@@ -208,7 +209,10 @@ def drops_query(marketplaces):
 
             func.lag(PriceHistory.price).over(
                 partition_by=PriceHistory.listing_id,
-                order_by=(PriceHistory.recorded_at.desc(), PriceHistory.id.desc())
+                order_by=(
+                    PriceHistory.recorded_at.asc(),
+                    PriceHistory.id.asc()
+                )
             ).label("old_price"),
         )
         .join(Listing, Listing.id == PriceHistory.listing_id)
@@ -229,8 +233,11 @@ def drops_query(marketplaces):
             ranked.c.currency,
             ranked.c.new_price,
             ranked.c.old_price,
-            (ranked.c.old_price - ranked.c.new_price).label("drop_amount"),
-            ((ranked.c.old_price - ranked.c.new_price) / ranked.c.old_price * 100).label("discount_percent"),
+            (ranked.c.new_price - ranked.c.old_price).label("drop_amount"),
+            (
+                (ranked.c.new_price - ranked.c.old_price)
+                / ranked.c.old_price * 100
+            ).label("discount_percent"),
             LegoSet.name.label("canon_name"),
             LegoSet.img_url.label("image_url"),
         )
@@ -240,7 +247,7 @@ def drops_query(marketplaces):
         )
         .filter(
             ranked.c.old_price.isnot(None),
-            ranked.c.new_price < ranked.c.old_price
+            ranked.c.new_price > ranked.c.old_price
         )
     )
 
