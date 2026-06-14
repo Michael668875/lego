@@ -381,11 +381,13 @@
             </td>
             <td>
               <div class="d-flex align-items-center gap-3">
-                <img class="listing-img"
-                    src="{{ row.image_url }}" loading="lazy">
+                <img class="listing-img" src="{{ row.image_url }}" loading="lazy">
                 <div>
-              {{ row.canon_name or "-" }}
+                  {{ row.canon_name or "-" }}
+                </div>
+              </div>
             </td>
+            
             <td>
               {%  if row.old_price %}
                 {{ helpers.price_display(row.old_price, currency, show_code=False) }}
@@ -400,7 +402,13 @@
                 -
               {% endif %}
             </td>
-            <td><span class="discount"> {{ row.discount_percent|round(0)|int if row.discount_percent else "0" }}% </span></td>
+            <td><span class="discount"> 
+              {% if row.discount_percent is not none %}
+                {{ row.discount_percent|round(0)|int }}%
+              {% else %}
+                -
+              {% endif %} 
+            </span></td>
             <td><a href="{{ row.affiliate_url }}" class="btn btn-primary text-nowrap" target="_blank">Buy on eBay</a></td>
             </tr>
           {% endfor %}
