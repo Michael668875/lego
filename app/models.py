@@ -66,6 +66,15 @@ class Listing(db.Model):
 
     last_seen = db.Column(db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
+    miss_count = db.Column(db.Integer, nullable=True, default=0)
+    ended_at = db.Column(db.DateTime, nullable=True)
+
+    last_updated = db.Column(
+        db.DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
+    )
+
     price_history = db.relationship(
         "PriceHistory",
         back_populates="listing",

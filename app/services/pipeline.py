@@ -48,22 +48,92 @@ def insert_listings():
         ON CONFLICT (ebay_item_id) DO NOTHING;                            
                             """))
 
+
+# update the price if it has changed
+def update_listing_prices():
+    db.session.execute(text(r"""
+        UPDATE listings l
+        SET
+            price = ts.price,
+            last_updated = NOW()
+        FROM temp_summaries ts
+        WHERE l.ebay_item_id = ts.ebay_item_id
+        AND l.status = 'ACTIVE'
+        AND l.price <> ts.price;
+    """))
+
+def mark_sold_listings():
+    """
+    Mark listings as ENDED if temp_summaries.sold_at is not NULL.
+    """
+    result = db.session.execute(text(r"""
+        UPDATE listings l
+        SET
+            status = 'ENDED',
+            ended_at = ts.sold_at,
+            last_updated = NOW()
+        FROM temp_summaries ts
+        WHERE l.ebay_item_id = ts.ebay_item_id
+        AND ts.sold_at IS NOT NULL
+        AND l.status != 'ENDED';
+    """))
+    print(f"Marked {result.rowcount} listings as sold.")
+
+# update last_seen, miss_count, last_updated 
+# each time a listing appears from api
+def update_seen_listings():
+    db.session.execute(text(r"""
+        UPDATE listings l
+        SET
+            last_seen = NOW(),
+            miss_count = 0,
+            last_updated = NOW()
+        FROM temp_summaries ts
+        WHERE l.ebay_item_id = ts.ebay_item_id
+        AND l.status = 'ACTIVE';
+    """))
+
+# increment the miss_count so listings can be marked as ended.
+def increment_miss_count():
+    db.session.execute(text(r"""
+        UPDATE listings l
+        SET
+            miss_count = miss_count + 1,
+            last_updated = NOW()
+        WHERE status = 'ACTIVE'
+        AND NOT EXISTS (
+            SELECT 1
+            FROM temp_summaries ts
+            WHERE ts.ebay_item_id = l.ebay_item_id
+        );
+    """))
+
+# change status to ended for listings
+def mark_ended_listings():
+    result = db.session.execute(text(r"""
+        UPDATE listings
+        SET
+            status = 'ENDED',
+            ended_at = NOW(),
+            last_updated = NOW()
+        WHERE status = 'ACTIVE'
+        AND miss_count >= 3;
+    """))
+    print(f"Marked {result.rowcount} listings as ended.")
+
+
+
 # create data for price_history table
 def insert_price_history():
-    """
-    Append a price_history row only when the current listing price differs
-    from the most recent recorded price (or if no history exists yet),
-    limited to listings present in the current scrape.
-    """
     result = db.session.execute(text(r"""
         INSERT INTO price_history (listing_id, price, currency)
         SELECT
             l.id,
-            l.price,
-            l.currency
+            ts.price,
+            ts.currency
         FROM listings l
         JOIN temp_summaries ts
-          ON ts.ebay_item_id = l.ebay_item_id
+            ON ts.ebay_item_id = l.ebay_item_id
         LEFT JOIN LATERAL (
             SELECT ph.price, ph.currency
             FROM price_history ph
@@ -72,12 +142,12 @@ def insert_price_history():
             LIMIT 1
         ) last_ph ON TRUE
         WHERE last_ph.price IS NULL
-           OR last_ph.price <> l.price
-           OR last_ph.currency <> l.currency;
+           OR last_ph.price <> ts.price
+           OR last_ph.currency <> ts.currency
     """))
 
     print("History rows inserted:", result.rowcount)
-
+    
 def find_set_number(title, valid_set_nums):
     """
     Extracts LEGO set numbers like:
@@ -155,7 +225,7 @@ def truncate_temp_tables():
 def run_pipeline():
     insert_listings()
     get_set_nums()
-    result = db.session.execute(text("""
+    debug_before = db.session.execute(text("""
     SELECT COUNT(*)
     FROM listings l
     LEFT JOIN LATERAL (
@@ -167,12 +237,19 @@ def run_pipeline():
     ) last_ph ON TRUE
     WHERE last_ph.price IS NULL
     OR last_ph.price <> l.price
-    """))
+    """)).scalar()
+    print("Listings needing history rows (before update):", debug_before)
 
-    print("Listings needing history rows:", result.scalar())
-    insert_price_history()
+    update_listing_prices()
+    inserted = insert_price_history()
+    print("History rows inserted:", inserted)
+
+    update_seen_listings()
+    mark_sold_listings()
+    increment_miss_count()
+    mark_ended_listings()
 
     db.session.commit()
 
-with app.app_context():
-    run_pipeline()
+#with app.app_context():
+#    run_pipeline()
