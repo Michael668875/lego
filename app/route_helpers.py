@@ -167,10 +167,17 @@ def db_bestdeals(marketplaces):
 # Listings 25%+ below average
 def bestdeals_listings(marketplaces):
     avg_subquery = db_bestdeals(marketplaces)
-    return (
+
+    discount_expr = (
+        (avg_subquery.c.avg_price - Listing.price)
+        / avg_subquery.c.avg_price
+    ).label("discount")
+
+    query = (
         db.session.query(
             Listing,
-            avg_subquery.c.avg_price
+            avg_subquery.c.avg_price.label("avg_price"),
+            discount_expr
         )
         .join(
             avg_subquery,
@@ -178,18 +185,14 @@ def bestdeals_listings(marketplaces):
         )
         .filter(Listing.marketplace.in_(marketplaces))
         .filter(Listing.status == "ACTIVE")
-        .filter(Listing.price <= avg_subquery.c.avg_price * 0.75) 
-        .order_by(
-            (
-                (avg_subquery.c.avg_price - Listing.price)
-                / avg_subquery.c.avg_price
-            ).desc()
-        )
+        .filter(Listing.price <= avg_subquery.c.avg_price * 0.75)
     )
+
+    return query, discount_expr
 
 
 # price drops logic
-
+"""
 def changes_query(marketplaces):
 
     ranked = (
@@ -221,7 +224,7 @@ def changes_query(marketplaces):
 
     curr = ranked.alias("curr")
     prev = ranked.alias("prev")
-
+    
     return (
         db.session.query(
             curr.c.listing_id,
@@ -280,7 +283,69 @@ def drops_query(marketplaces):
     )
 
     return query
+"""
 
+
+
+
+from sqlalchemy.orm import aliased
+
+from sqlalchemy import func
+
+def drops_query(marketplaces):
+
+    ranked = (
+        db.session.query(
+            PriceHistory.listing_id,
+            PriceHistory.price,
+            PriceHistory.recorded_at,
+            Listing.set_num,
+            Listing.title,
+            Listing.ebay_item_id,
+            Listing.affiliate_url,
+            Listing.currency,
+
+            func.row_number().over(
+                partition_by=PriceHistory.listing_id,
+                order_by=(PriceHistory.recorded_at.desc(), PriceHistory.id.desc())
+            ).label("rn")
+        )
+        .join(Listing, Listing.id == PriceHistory.listing_id)
+        .filter(
+            Listing.status == "ACTIVE",
+            Listing.marketplace.in_(marketplaces),
+            Listing.set_num.isnot(None),
+        )
+        .subquery()
+    )
+
+    curr = ranked.alias("curr")
+    prev = ranked.alias("prev")
+
+    q = (
+        db.session.query(
+            curr.c.set_num,
+            curr.c.title,
+            curr.c.ebay_item_id,
+            curr.c.affiliate_url,
+            curr.c.currency,
+            curr.c.price.label("new_price"),
+            prev.c.price.label("old_price"),
+            (prev.c.price - curr.c.price).label("drop_amount"),
+            (
+                (prev.c.price - curr.c.price)
+                / prev.c.price * 100
+            ).label("discount_percent"),
+        )
+        .join(prev, curr.c.listing_id == prev.c.listing_id)
+        .filter(
+            curr.c.rn == 1,
+            prev.c.rn == 2,
+            prev.c.price > curr.c.price
+        )
+    )
+
+    return q
 
 # models logic
 def model_query(marketplaces):
@@ -492,10 +557,12 @@ def sort_listings(query, sort, direction):
 
     return query.order_by(column.desc())
 
-def sort_deals(query, sort, direction):
+def sort_deals(query, sort, direction, discount_expr=None):
+
     sort_columns = {
         "price": Listing.price,
         "set_num": Listing.set_num,
+        "discount": discount_expr,
     }
 
     column = sort_columns.get(sort, Listing.price)

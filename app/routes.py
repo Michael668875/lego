@@ -101,7 +101,7 @@ def listings(country):
     query = sort_listings(
         query,
         request.args.get("sort", "price"),
-        request.args.get("direction", "asc")
+        request.args.get("direction", "desc")
     )
 
     listings = paginate(query)
@@ -158,12 +158,15 @@ def overview(country):
 @bp.route("/<country>/best_deals")
 def best_deals(country):        
 
-    query = bestdeals_listings(g.marketplaces)
+    query, discount_expr = bestdeals_listings(g.marketplaces)
+    
+    query = query.order_by(None)
 
-    query = sort_listings(
+    query = sort_deals(
         query,
         request.args.get("sort", "price"),
-        request.args.get("direction", "asc")
+        request.args.get("direction", "asc"),
+        discount_expr
     )
 
     listings = paginate(query)
@@ -173,9 +176,9 @@ def best_deals(country):
         listings=listings,
         sets=listings.items,
     )
-
+"""
 @bp.route("/<country>/drops")
-def price_drops(country):    
+def price_drops(country):
 
     query = drops_query(g.marketplaces)
 
@@ -186,7 +189,36 @@ def price_drops(country):
         listings=listings,
         sets=listings.items,
     )
+"""
 
+def get_marketplace_filter(marketplaces):
+    return listings.c.marketplace.in_(marketplaces)
+
+@bp.route("/<country>/drops")
+def price_drops(country):
+
+    marketplaces_map = {
+        "us": ["EBAY_US"],
+        "au": ["EBAY_AU"],
+        "gb": ["EBAY_GB"],
+        "de": ["EBAY_DE"],
+    }
+
+    marketplaces = marketplaces_map.get(country.lower(), [])
+
+    query = drops_query(marketplaces)
+
+    print("RAW COUNT:", query.count())
+
+    print("FIRST ROW:", query.limit(1).all())
+
+    listings = paginate(query)
+
+    return render_template(
+        "price_drops.html",
+        listings=listings,
+        sets=listings.items,
+    )
 
 @bp.route("/<country>/models")
 def models(country):
