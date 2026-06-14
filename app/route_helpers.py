@@ -192,7 +192,6 @@ def bestdeals_listings(marketplaces):
 
 
 # price drops logic
-
 def drops_query(marketplaces):
 
     ranked = (
@@ -209,7 +208,7 @@ def drops_query(marketplaces):
 
             func.lag(PriceHistory.price).over(
                 partition_by=PriceHistory.listing_id,
-                order_by=(PriceHistory.recorded_at, PriceHistory.id)
+                order_by=(PriceHistory.recorded_at.desc(), PriceHistory.id.desc())
             ).label("old_price"),
         )
         .join(Listing, Listing.id == PriceHistory.listing_id)
@@ -221,9 +220,6 @@ def drops_query(marketplaces):
         .subquery()
     )
 
-    drop_amount = (ranked.c.old_price - ranked.c.new_price)
-    discount_percent = (drop_amount / ranked.c.old_price) * 100
-
     return (
         db.session.query(
             ranked.c.set_num,
@@ -231,13 +227,10 @@ def drops_query(marketplaces):
             ranked.c.ebay_item_id,
             ranked.c.affiliate_url,
             ranked.c.currency,
-
             ranked.c.new_price,
             ranked.c.old_price,
-
-            drop_amount.label("drop_amount"),
-            discount_percent.label("discount_percent"),
-
+            (ranked.c.old_price - ranked.c.new_price).label("drop_amount"),
+            ((ranked.c.old_price - ranked.c.new_price) / ranked.c.old_price * 100).label("discount_percent"),
             LegoSet.name.label("canon_name"),
             LegoSet.img_url.label("image_url"),
         )
@@ -250,7 +243,6 @@ def drops_query(marketplaces):
             ranked.c.new_price < ranked.c.old_price
         )
     )
-
 
 # models logic
 def model_query(marketplaces):
