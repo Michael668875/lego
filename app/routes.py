@@ -94,9 +94,15 @@ def index():
     return redirect(url_for("main.listings", country="us"))
 
 @bp.route("/<country>/")
-def listings(country):
+def listings(country):    
 
     query = db_query(g.marketplaces)
+
+    query = sort_listings(
+        query,
+        request.args.get("sort", "price"),
+        request.args.get("direction", "asc")
+    )
 
     listings = paginate(query)
 
@@ -153,6 +159,12 @@ def overview(country):
 def best_deals(country):        
 
     query = bestdeals_listings(g.marketplaces)
+
+    query = sort_listings(
+        query,
+        request.args.get("sort", "price"),
+        request.args.get("direction", "asc")
+    )
 
     listings = paginate(query)
 

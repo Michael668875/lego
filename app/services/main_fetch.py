@@ -3,7 +3,7 @@ import os
 import sys
 from app import create_app
 from app.services.save_temp import save_temp_summaries
-from app.services.pipeline import run_pipeline
+from app.services.pipeline import run_pipeline, truncate_temp_tables
 from app.services.fetch import get_paginated_summaries
 #from app.services.parse import blacklist
 from datetime import datetime
@@ -42,6 +42,9 @@ def main():
     app = create_app()
     try:
         with app.app_context():
+
+            # delete old temp_summaries
+            truncate_temp_tables()
             
             # Fetch summaries
             items = get_paginated_summaries()

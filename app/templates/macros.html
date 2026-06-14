@@ -42,7 +42,7 @@
               <a class="menu-link btn btn-light mx-0" href="{{ url_for('main.overview', country=country) }}">Overview</a>
               <a class="menu-link btn btn-light mx-0" href="{{ url_for('main.best_deals', country=country) }}">Best Deals</a>
               <a class="menu-link btn btn-light mx-0" href="{{ url_for('main.price_drops', country=country) }}">Price Drops</a>
-              <a class="menu-link btn btn-light mx-0" href="{{ url_for('main.models', country=country) }}">Available Models</a>
+              <a class="menu-link btn btn-light mx-0" href="{{ url_for('main.models', country=country) }}">Available Sets</a>
             </div>
           </div>
         </nav>
@@ -159,9 +159,20 @@
         <table class="table align-middle">
         <thead>
             <tr>
-            <th>Set</th>
+            <th>{{ helpers.sort_link('Set', 'set_num') }}</th>
             <th>Condition</th>
-            <th class="text-nowrap">Price <small>{{ currency }}</small></th>
+            <th class="text-nowrap">
+                {% set price_label %}
+                    <span class="price-heading-wrap">
+                        <span>Price</span>
+                        {% if currency %}
+                            <span class="price-heading-code">{{ currency }}</span>
+                        {% endif %}
+                    </span>
+                {% endset %}
+                    
+                {{ helpers.sort_link(price_label|safe, 'price') }}            
+            </th>
             <th>Url</th>
             </tr>
         </thead>
@@ -276,9 +287,20 @@
         <table class="table align-middle">
         <thead>
             <tr>
-            <th>Set</th>
+            <th>{{ helpers.sort_link('Set', 'set_num') }}</th>
             <th>Title</th>
-            <th class="text-nowrap">Price <small>{{ currency }}</small></th>
+            <th class="text-nowrap">
+              {% set price_label %}
+                    <span class="price-heading-wrap">
+                        <span>Price</span>
+                        {% if currency %}
+                            <span class="price-heading-code">{{ currency }}</span>
+                        {% endif %}
+                    </span>
+                {% endset %}
+                    
+                {{ helpers.sort_link(price_label|safe, 'price') }}              
+            </th>
             <th>Market Average</th>
             <th>Discount</th>
             <th>Listing</th>

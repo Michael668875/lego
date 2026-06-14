@@ -55,7 +55,7 @@ def insert_price_history():
     from the most recent recorded price (or if no history exists yet),
     limited to listings present in the current scrape.
     """
-    db.session.execute(text(r"""
+    result = db.session.execute(text(r"""
         INSERT INTO price_history (listing_id, price, currency)
         SELECT
             l.id,
@@ -75,6 +75,8 @@ def insert_price_history():
            OR last_ph.price <> l.price
            OR last_ph.currency <> l.currency;
     """))
+
+    print("History rows inserted:", result.rowcount)
 
 def find_set_number(title, valid_set_nums):
     """
@@ -139,11 +141,35 @@ def get_set_nums():
         if set_num:
             listing.set_num = str(set_num)
 
+# delete temp data
+def truncate_temp_tables():
+    """
+    Clear temp tables for next scrape.
+    """
+    db.session.execute(text(r"""
+        TRUNCATE temp_summaries;
+    """))
+
     
 
 def run_pipeline():
     insert_listings()
     get_set_nums()
+    result = db.session.execute(text("""
+    SELECT COUNT(*)
+    FROM listings l
+    LEFT JOIN LATERAL (
+        SELECT price
+        FROM price_history ph
+        WHERE ph.listing_id = l.id
+        ORDER BY ph.recorded_at DESC, ph.id DESC
+        LIMIT 1
+    ) last_ph ON TRUE
+    WHERE last_ph.price IS NULL
+    OR last_ph.price <> l.price
+    """))
+
+    print("Listings needing history rows:", result.scalar())
     insert_price_history()
 
     db.session.commit()

@@ -37,7 +37,6 @@ def db_query(marketplaces, set_num=None):
             Listing.status == "ACTIVE",
             Listing.marketplace.in_(marketplaces),
         )
-        .order_by(Listing.price.asc(), Listing.id.asc())
     )
 
     if set_num:
@@ -190,7 +189,7 @@ def bestdeals_listings(marketplaces):
 
 
 # price drops logic
-def old_price_query():
+def old_price_query():    
     return func.lag(PriceHistory.price).over(
         partition_by=PriceHistory.listing_id,
         order_by=(PriceHistory.recorded_at, PriceHistory.id)
@@ -462,3 +461,29 @@ def search_query():
     print(raw_results)
     return q, results
 
+def sort_listings(query, sort, direction):
+
+    sort_columns = {
+        "price": Listing.price,
+        "set_num": Listing.set_num,
+    }
+
+    column = sort_columns.get(sort, Listing.price)
+
+    if direction == "asc":
+        return query.order_by(column.asc())
+
+    return query.order_by(column.desc())
+
+def sort_deals(query, sort, direction):
+    sort_columns = {
+        "price": Listing.price,
+        "set_num": Listing.set_num,
+    }
+
+    column = sort_columns.get(sort, Listing.price)
+
+    if direction == "asc":
+        return query.order_by(column.asc())
+
+    return query.order_by(column.desc())

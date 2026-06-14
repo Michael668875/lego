@@ -55,6 +55,30 @@
 </nav>
 {% endmacro %}
 
+<!-- SORTING -->
+
+{% macro sort_link(label, sort_value) %}
+    {% set args = request.args.to_dict() %}
+    {% set current_sort = request.args.get('sort', 'price') %}
+    {% set current_dir = request.args.get('direction', 'asc') %}
+
+    {% if current_sort == sort_value %}
+        {% set next_dir = 'desc' if current_dir == 'asc' else 'asc' %}
+        {% set arrow = '▲' if current_dir == 'asc' else '▼' %}
+    {% else %}
+        {% set next_dir = 'asc' %}
+        {% set arrow = '↕' %}
+    {% endif %}
+
+    {% set _ = args.update({'sort': sort_value, 'direction': next_dir}) %}
+
+    <a href="{{ request.path }}?{{ args|urlencode }}"
+       class="text-decoration-none text-reset d-inline-flex align-items-center gap-1 text-nowrap">
+        <span>{{ label|safe }}</span>
+        <span class="sort-arrow">{{ arrow }}</span>
+    </a>
+{% endmacro %}
+
 
 
 
