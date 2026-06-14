@@ -189,48 +189,68 @@ def bestdeals_listings(marketplaces):
 
 
 # price drops logic
-def old_price_query():    
-    return func.lag(PriceHistory.price).over(
-        partition_by=PriceHistory.listing_id,
-        order_by=(PriceHistory.recorded_at, PriceHistory.id)
-    )
 
 def changes_query(marketplaces):
-    old_price = old_price_query()
-    return (
-            db.session.query(
-                PriceHistory.listing_id.label("listing_id"),
 
-                Listing.set_num.label("set_num"),
-                Listing.title.label("title"),
+    ranked = (
+        db.session.query(
+            PriceHistory.id.label("ph_id"),
+            PriceHistory.listing_id.label("listing_id"),
+            PriceHistory.price.label("price"),
+            PriceHistory.recorded_at.label("recorded_at"),
 
-                Listing.ebay_item_id.label("ebay_item_id"),
-                Listing.affiliate_url.label("affiliate_url"),
+            Listing.set_num.label("set_num"),
+            Listing.title.label("title"),
+            Listing.ebay_item_id.label("ebay_item_id"),
+            Listing.affiliate_url.label("affiliate_url"),
+            Listing.currency.label("currency"),
 
-                PriceHistory.price.label("new_price"),
-                old_price.label("old_price"),
-
-                Listing.currency.label("currency"),
-            )
-            .join(Listing, Listing.id == PriceHistory.listing_id)
-            .filter(
-                Listing.status == "ACTIVE",
-                Listing.marketplace.in_(marketplaces),
-                Listing.set_num.isnot(None),
-            )
-            .subquery()
+            func.row_number().over(
+                partition_by=PriceHistory.listing_id,
+                order_by=(PriceHistory.recorded_at.desc(), PriceHistory.id.desc())
+            ).label("rn")
         )
+        .join(Listing, Listing.id == PriceHistory.listing_id)
+        .filter(
+            Listing.status == "ACTIVE",
+            Listing.marketplace.in_(marketplaces),
+            Listing.set_num.isnot(None),
+        )
+        .subquery()
+    )
+
+    curr = ranked.alias("curr")
+    prev = ranked.alias("prev")
+
+    return (
+        db.session.query(
+            curr.c.listing_id,
+            curr.c.set_num,
+            curr.c.title,
+            curr.c.ebay_item_id,
+            curr.c.affiliate_url,
+            curr.c.currency,
+
+            curr.c.price.label("new_price"),
+            prev.c.price.label("old_price"),
+        )
+        .join(prev, curr.c.listing_id == prev.c.listing_id)
+        .filter(
+            curr.c.rn == 1,
+            prev.c.rn == 2
+        )
+        .subquery()
+    )
 
 def drops_query(marketplaces):
 
     price_changes_subq = changes_query(marketplaces)
 
-    return (
+    query = (
         db.session.query(
             price_changes_subq.c.set_num,
             LegoSet.name.label("canon_name"),
             price_changes_subq.c.title,
-
             LegoSet.img_url.label("image_url"),
 
             price_changes_subq.c.ebay_item_id,
@@ -238,16 +258,11 @@ def drops_query(marketplaces):
             price_changes_subq.c.old_price,
             price_changes_subq.c.new_price,
 
-            (
-                price_changes_subq.c.old_price
-                - price_changes_subq.c.new_price
-            ).label("drop_amount"),
+            (price_changes_subq.c.old_price - price_changes_subq.c.new_price)
+                .label("drop_amount"),
 
             (
-                (
-                    price_changes_subq.c.old_price
-                    - price_changes_subq.c.new_price
-                )
+                (price_changes_subq.c.old_price - price_changes_subq.c.new_price)
                 / price_changes_subq.c.old_price * 100
             ).label("discount_percent"),
 
@@ -258,12 +273,14 @@ def drops_query(marketplaces):
             LegoSet,
             LegoSet.base_set_num == price_changes_subq.c.set_num
         )
-         # remove filter for debuggin. restore later
-        .filter( 
+        .filter(
             price_changes_subq.c.old_price.isnot(None),
-            price_changes_subq.c.new_price < price_changes_subq.c.old_price,
+            price_changes_subq.c.old_price > price_changes_subq.c.new_price
         )
     )
+
+    return query
+
 
 # models logic
 def model_query(marketplaces):
