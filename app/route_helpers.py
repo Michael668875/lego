@@ -234,9 +234,8 @@ def drops_query(marketplaces):
             ranked.c.currency,
             ranked.c.new_price,
             ranked.c.old_price,
-            (ranked.c.new_price - ranked.c.old_price).label("drop_amount"),
             (
-                (ranked.c.new_price - ranked.c.old_price)
+                (ranked.c.old_price - ranked.c.new_price)
                 / ranked.c.old_price * 100
             ).label("discount_percent"),
             LegoSet.name.label("canon_name"),
