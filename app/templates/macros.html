@@ -159,7 +159,7 @@
         <table class="table align-middle">
         <thead>
             <tr>
-            <th>{{ helpers.sort_link('Set', 'set_num') }}</th>
+            <th>{{ helpers.sort_link('Set', 'set_num', 'price', 'desc') }}</th>
             <th>Condition</th>
             <th class="text-nowrap">
                 {% set price_label %}
@@ -171,7 +171,7 @@
                     </span>
                 {% endset %}
                     
-                {{ helpers.sort_link(price_label|safe, 'price') }}            
+                {{ helpers.sort_link(price_label|safe, 'price', 'price', 'desc') }}            
             </th>
             <th>Url</th>
             </tr>
@@ -224,10 +224,10 @@
         <table class="table align-middle">
         <thead>
             <tr>
-            <th>Set</th>
+            <th> {{ helpers.sort_link('Set', 'set_num', 'count', 'desc') }} </th>
             <th>Title</th>
-            <th>Starting From</th>
-            <th>Number of Listings</th>
+            <th> {{ helpers.sort_link('Starting From', 'price', 'count', 'desc') }} </th>
+            <th> {{ helpers.sort_link('Number of Listings', 'count', 'count', 'desc') }}</th>
             </tr>
         </thead>
 
@@ -287,7 +287,7 @@
         <table class="table align-middle">
         <thead>
             <tr>
-            <th>{{ helpers.sort_link('Set', 'set_num') }}</th>
+            <th>{{ helpers.sort_link('Set', 'set_num', 'discount', 'desc') }}</th>
             <th>Title</th>
             <th class="text-nowrap">
               {% set price_label %}
@@ -299,10 +299,10 @@
                     </span>
                 {% endset %}
                     
-                {{ helpers.sort_link(price_label|safe, 'price') }}              
+                {{ helpers.sort_link(price_label|safe, 'price', 'discount', 'desc') }}              
             </th>
             <th>Market Average</th>
-            <th>{{ helpers.sort_link('Discount', 'discount') }}</th>
+            <th>{{ helpers.sort_link('Discount', 'discount', 'discount', 'desc') }}</th>
             <th>Listing</th>
             </tr>
         </thead>
@@ -357,11 +357,11 @@
         <table class="table align-middle">
         <thead>
             <tr>
-            <th>Set</th>
+            <th> {{ helpers.sort_link('Set', 'set_num', 'discount_percent', 'desc') }} </th>
             <th>Title</th>
-            <th>Old Price</th>
-            <th>New Price</th>
-            <th>Discount</th>
+            <th> {{ helpers.sort_link('Old Price', 'old_price', 'discount_percent', 'desc') }} </th>
+            <th> {{ helpers.sort_link('New Price', 'new_price', 'discount_percent', 'desc') }} </th>
+            <th> {{ helpers.sort_link('Discount', 'discount_percent', 'discount_percent', 'desc') }} </th>
             <th>Listing</th>
             </tr>
         </thead>

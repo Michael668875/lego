@@ -138,15 +138,16 @@ def db_overview(marketplaces):
         .scalar_subquery()
     )
 
-    return (
+    query = (
         db.session.query(
             base_q.c.set_num,
             base_q.c.count,
             Listing
         )
         .join(Listing, Listing.id == cheapest_listing_subq)
-        .order_by(base_q.c.count.desc())
     )
+
+    return query, base_q
 
 
 # best deals logic
@@ -224,7 +225,7 @@ def drops_query(marketplaces):
         .subquery()
     )
 
-    return (
+    query = (
         db.session.query(
             ranked.c.set_num,
             ranked.c.title,
@@ -247,9 +248,11 @@ def drops_query(marketplaces):
         )
         .filter(
             ranked.c.old_price.isnot(None),
-            ranked.c.new_price > ranked.c.old_price
+            ranked.c.new_price < ranked.c.old_price
         )
     )
+
+    return query, ranked
 
 # models logic
 def model_query(marketplaces):
@@ -469,7 +472,39 @@ def sort_deals(query, sort, direction, discount_expr=None):
         "discount": discount_expr,
     }
 
-    column = sort_columns.get(sort, Listing.price)
+    column = sort_columns.get(sort, discount_expr)
+
+    if direction == "asc":
+        return query.order_by(column.asc())
+
+    return query.order_by(column.desc())
+
+def sort_overview(query, sort, direction, l_count):
+
+    sort_columns = {
+        "price": Listing.price,
+        "set_num": Listing.set_num,
+        "count": l_count,
+    }
+
+    column = sort_columns.get(sort, l_count)
+
+    if direction == "asc":
+        return query.order_by(column.asc())
+    return query.order_by(column.desc())
+
+def sort_drops(query, sort, direction, set_num, old_price, new_price):
+    
+    discount_percent = ((new_price - old_price) / old_price * 100)
+
+    sort_columns = {
+        "set_num": set_num,
+        "old_price": old_price,
+        "new_price": new_price,
+        "discount_percent": discount_percent
+    }
+
+    column = sort_columns.get(sort, discount_percent)
 
     if direction == "asc":
         return query.order_by(column.asc())
