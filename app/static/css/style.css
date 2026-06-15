@@ -50,10 +50,37 @@
       font-weight: 600;
     }
 
-    .table td,
-    .table th {
-      vertical-align: middle;
+    .table-wrap,
+    .table-responsive {
+      max-width: 100%;
+      overflow-x: auto;
     }
+
+    .table {
+      width: 100%;
+      table-layout: fixed;
+      min-width: 800px;
+    }
+
+    .table th,
+    .table td {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      min-width: 0;
+    }    
+
+    .col-title {
+        white-space: normal;
+        word-break: break-word;
+    }
+    .col-set { width: 90px; }
+    .col-price { width: 120px; }
+    .col-condition { width: 110px}
+    .col-discount { width: 100px; }
+    .col-url { width: 140px; }
+    .col-starting { width: 160px;}
+    .col-count { width: 180px;}
 
     .menu-link {
       text-decoration: none;
