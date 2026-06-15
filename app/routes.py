@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, g, request, send_from_directory, current_app
+from flask import Blueprint, render_template, redirect, url_for, g, request, send_from_directory, current_app, make_response
 from datetime import datetime, timezone
 from app.route_helpers import *
 
@@ -108,7 +108,7 @@ def listings(country):
 
     stats = homepage_stats(g.marketplaces)
 
-    return render_template(
+    response = make_response(render_template(
         "listings.html",
         listings=listings,
         sets=listings.items,
@@ -116,18 +116,24 @@ def listings(country):
         top_theme=stats["top_theme"],
         top_theme_id=stats["top_theme_id"],
         best_deals_count=stats["best_deals_count"]
-    )
+    ))
+
+    response.headers["Cache-Control"] = "public, max-age=60"
+    return response
 
 @bp.route("/<country>/<set_num>")
 def set_list(country, set_num):
 
     listings = db_query(g.marketplaces, set_num)
 
-    return render_template(
+    response = make_response(render_template(
         "set_list.html",
         listings=listings,
         set_num=set_num,
-    )
+    ))
+
+    response.headers["Cache-Control"] = "public, max-age=60"
+    return response
 
 @bp.route("/<country>/theme/<int:theme_id>")
 def theme_sets(country, theme_id):
@@ -136,11 +142,14 @@ def theme_sets(country, theme_id):
 
     sets = get_sets(theme_id, g.marketplaces)
     
-    return render_template(
+    response = make_response(render_template(
         "theme_sets.html",
         theme=theme,
         sets=sets,
-    )
+    ))
+
+    response.headers["Cache-Control"] = "public, max-age=60"
+    return response
 
 @bp.route("/<country>/overview")
 def overview(country):
@@ -156,11 +165,14 @@ def overview(country):
 
     listings = paginate(query)
 
-    return render_template(
+    response = make_response(render_template(
         "overview.html",
         listings=listings,
         sets = listings.items,
-    )
+    ))
+
+    response.headers["Cache-Control"] = "public, max-age=60"
+    return response
 
 @bp.route("/<country>/best_deals")
 def best_deals(country):        
@@ -176,11 +188,14 @@ def best_deals(country):
 
     listings = paginate(query)
 
-    return render_template(
+    response = make_response(render_template(
         "best_deals.html",
         listings=listings,
         sets=listings.items,
-    )
+    ))
+
+    response.headers["Cache-Control"] = "public, max-age=60"
+    return response
 
 @bp.route("/<country>/drops")
 def price_drops(country):
@@ -198,11 +213,14 @@ def price_drops(country):
 
     listings = paginate(query)
 
-    return render_template(
+    response = make_response(render_template(
         "price_drops.html",
         listings=listings,
         sets=listings.items,
-    )
+    ))
+
+    response.headers["Cache-Control"] = "public, max-age=60"
+    return response
 
 @bp.route("/<country>/models")
 def models(country):
@@ -211,32 +229,41 @@ def models(country):
 
     themes = theme_query(rows)
 
-    return render_template(
+    response = make_response(render_template(
         "models.html",
         themes=themes,
-    )
+    ))
+
+    response.headers["Cache-Control"] = "public, max-age=60"
+    return response
 
 @bp.route("/<country>/set/<base_set>")
 def set_page(country, base_set):
 
     set_data, stats = get_set_data(base_set, g.country)
 
-    return render_template(
+    response = make_response(render_template(
         "set_page.html",
         set_data=set_data,
         stats=stats,
-    )
+    ))
+
+    response.headers["Cache-Control"] = "public, max-age=60"
+    return response
 
 @bp.route("/<country>/search")
 def search(country):
 
     q, results = search_query()
 
-    return render_template(
+    response = make_response(render_template(
         "search_results.html",
         results=results,
         query=q
-    )
+    ))
+
+    response.headers["Cache-Control"] = "public, max-age=60"
+    return response
 
 @bp.route("/<country>/about")
 def about(country):

@@ -75,6 +75,15 @@ class Listing(db.Model):
         onupdate=lambda: datetime.now(timezone.utc),
     )
 
+    __table_args__ = (
+        db.Index(
+            "ix_listings_active_marketplace_setnum",
+            "status",
+            "marketplace",
+            "set_num",
+        ),
+    )
+
     price_history = db.relationship(
         "PriceHistory",
         back_populates="listing",
@@ -98,6 +107,15 @@ class PriceHistory(db.Model):
     recorded_at = db.Column(db.DateTime(timezone=True), nullable=False, server_default=func.now(), index=True)
 
     listing = db.relationship("Listing", back_populates="price_history")
+
+    __table_args__ = (
+        db.Index(
+            "ix_pricehistory_listing_time",
+            "listing_id",
+            "recorded_at",
+            "id",
+        ),
+    )
 
 
 class LegoSet(db.Model):
