@@ -5,6 +5,7 @@ from app.route_helpers import *
 
 bp = Blueprint("main", __name__)
 
+
 @bp.app_errorhandler(404)
 def not_found_error(error):
     return render_template("404.html"), 404
