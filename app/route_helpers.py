@@ -494,7 +494,7 @@ def sort_overview(query, sort, direction, l_count):
 
 def sort_drops(query, sort, direction, set_num, old_price, new_price):
     
-    discount_percent = ((new_price - old_price) / old_price * 100)
+    discount_percent = ((old_price - new_price) / old_price * 100)
 
     sort_columns = {
         "set_num": set_num,
