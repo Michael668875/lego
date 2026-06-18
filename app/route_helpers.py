@@ -400,7 +400,8 @@ def get_set_data(base_set, country):
         func.min(Listing.price).label("cheapest_price")
     ).filter(
         Listing.set_num == base_set,
-        Listing.country == country.upper()
+        Listing.country == country.upper(),
+        Listing.status == "ACTIVE"
     ).first()
 
     return set_data, stats
