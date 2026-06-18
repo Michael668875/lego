@@ -85,12 +85,13 @@ def update_seen_listings():
     db.session.execute(text(r"""
         UPDATE listings l
         SET
-            last_seen = NOW(),
+            status = 'ACTIVE',
             miss_count = 0,
-            last_updated = NOW()
+            last_seen = NOW(),
+            last_updated = NOW(),
+            ended_at = NULL
         FROM temp_summaries ts
-        WHERE l.ebay_item_id = ts.ebay_item_id
-        AND l.status = 'ACTIVE';
+        WHERE l.ebay_item_id = ts.ebay_item_id;
     """))
 
 # increment the miss_count so listings can be marked as ended.
@@ -109,6 +110,7 @@ def increment_miss_count():
     """))
 
 # change status to ended for listings
+# changed miss_count >= 12; - will mark ended if not seen for 48 hours
 def mark_ended_listings():
     result = db.session.execute(text(r"""
         UPDATE listings
@@ -117,7 +119,7 @@ def mark_ended_listings():
             ended_at = NOW(),
             last_updated = NOW()
         WHERE status = 'ACTIVE'
-        AND miss_count >= 3;
+        AND miss_count >= 12; 
     """))
     print(f"Marked {result.rowcount} listings as ended.")
 
@@ -225,25 +227,8 @@ def truncate_temp_tables():
 def run_pipeline():
     insert_listings()
     get_set_nums()
-    debug_before = db.session.execute(text("""
-    SELECT COUNT(*)
-    FROM listings l
-    LEFT JOIN LATERAL (
-        SELECT price
-        FROM price_history ph
-        WHERE ph.listing_id = l.id
-        ORDER BY ph.recorded_at DESC, ph.id DESC
-        LIMIT 1
-    ) last_ph ON TRUE
-    WHERE last_ph.price IS NULL
-    OR last_ph.price <> l.price
-    """)).scalar()
-    print("Listings needing history rows (before update):", debug_before)
-
     update_listing_prices()
-    inserted = insert_price_history()
-    print("History rows inserted:", inserted)
-
+    insert_price_history()
     update_seen_listings()
     mark_sold_listings()
     increment_miss_count()
