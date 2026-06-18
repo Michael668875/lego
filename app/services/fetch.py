@@ -65,7 +65,7 @@ def get_paginated_summaries(query="lego", limit=200):
                 "limit": limit,
                 "offset": offset,
                 "fieldgroups": "EXTENDED",
-                "sort": "newlyListed",
+               # "sort": "newlyListed", # this may be hurting fetch. rely on ebay's default sort instead
                 "filter": f"conditionIds:{{1000|1500|2000|2500|3000}},"
                         f"buyingOptions:{{FIXED_PRICE}},"
                         f"itemLocationCountry:{country_code}"
