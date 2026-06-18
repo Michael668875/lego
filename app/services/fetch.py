@@ -33,10 +33,10 @@ def get_paginated_summaries(query="lego", limit=200):
     token = get_token()
 
     marketplaces = {
-        "EBAY_US": {"country": "US", "max_items": 400},
-        "EBAY_AU": {"country": "AU", "max_items": 400},
-        "EBAY_GB": {"country": "GB", "max_items": 400},
-        "EBAY_DE": {"country": "DE", "max_items": 400}
+        "EBAY_US": {"country": "US", "max_items": 1000},
+        "EBAY_AU": {"country": "AU", "max_items": 1000},
+        "EBAY_GB": {"country": "GB", "max_items": 1000},
+        "EBAY_DE": {"country": "DE", "max_items": 1000}
     }
 
     all_items = []
@@ -76,12 +76,14 @@ def get_paginated_summaries(query="lego", limit=200):
                 resp = requests.get(url, headers=headers, params=params)
                 resp.raise_for_status()
 
+                """
                 data = resp.json()  # added for debug and to get total values
 
                 print( # find out total fetchable values
                     f"{market}: total={data.get('total', 'unknown')} "
                     f"offset={offset}"
                 )
+                """
 
                 items = resp.json().get("itemSummaries", [])
 
