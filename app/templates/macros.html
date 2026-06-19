@@ -381,7 +381,10 @@
             </td>
             <td>
               <div class="d-flex align-items-center gap-3">
+                {% if row.image_url %}
                 <img class="listing-img" src="{{ row.image_url }}" loading="lazy">
+                {% else %}
+                <img class="listing-img" src="{{ url_for('static', filename='img/favicon-32x32.png') }}" loading="lazy"> 
                 <div>
                   {{ row.canon_name or "-" }}
                 </div>
