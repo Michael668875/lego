@@ -22,15 +22,24 @@ def seed_sets():
 
     with app.app_context():
 
+        existing_sets = {
+            row[0]
+            for row in db.session.query(LegoSet.suffix_set_num).all()
+        }
+
+        batch = []
+        added = 0
+
         with open(CSV_PATH, newline="", encoding="utf-8") as csvfile:
 
             reader = csv.DictReader(csvfile)
 
-            batch = []
-
             for row in reader:
 
                 set_num = row["set_num"]
+
+                if set_num in existing_sets:
+                    continue
 
                 lego_set = LegoSet(
                     suffix_set_num=set_num,
@@ -43,19 +52,19 @@ def seed_sets():
                 )
 
                 batch.append(lego_set)
+                existing_sets.add(set_num)
+                added += 1
 
-                # bulk insert every 1000 rows
                 if len(batch) >= 1000:
                     db.session.bulk_save_objects(batch)
                     db.session.commit()
                     batch.clear()
 
-            # remaining rows
             if batch:
                 db.session.bulk_save_objects(batch)
                 db.session.commit()
 
-        print("Finished seeding lego_sets table.")
+        print(f"Finished seeding lego_sets table. Added {added} new sets.")
 
 
 if __name__ == "__main__":
