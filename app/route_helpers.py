@@ -1,4 +1,4 @@
-from flask import abort, request, render_template, url_for
+from flask import abort, request, render_template, url_for, g
 from sqlalchemy import func, exists, case, desc
 from app.models import Listing, PriceHistory, LegoSet, Theme
 from app.extensions import db
@@ -415,13 +415,16 @@ def search_query():
             results=[],
             query=q
         )
+    
+    country = g.country.upper()
 
     raw_results = (
         LegoSet.query
         .filter(
             db.exists().where(
                 (Listing.set_num == LegoSet.base_set_num) &
-                (Listing.status == "ACTIVE")
+                (Listing.status == "ACTIVE") &
+                (Listing.country == country)
             )
         )
         .filter(
