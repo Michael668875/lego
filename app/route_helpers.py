@@ -117,6 +117,8 @@ def homepage_stats(marketplaces):
 #overview logic
 def db_overview(marketplaces):
 
+    country = g.country.upper()
+
     base_q = (
         db.session.query(
             Listing.set_num.label("set_num"),
@@ -124,6 +126,8 @@ def db_overview(marketplaces):
         )
         .filter(Listing.marketplace.in_(marketplaces))
         .filter(Listing.set_num.isnot(None))
+        .filter(Listing.status == "ACTIVE")
+        .filter(Listing.country == country)
         .group_by(Listing.set_num)
         .subquery()
     )
