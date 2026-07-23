@@ -127,6 +127,12 @@ def set_list(country, set_num):
 
     listings = db_query(g.marketplaces, set_num)
 
+    listings = sort_listings(
+            listings,
+            request.args.get("sort", "price"),
+            request.args.get("direction", "desc")
+        )
+
     response = make_response(render_template(
         "set_list.html",
         listings=listings,
