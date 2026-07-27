@@ -184,7 +184,8 @@
             <td>
                 <div class="d-flex align-items-center gap-3">
                 <img class="listing-img"
-                    src="{{ listing.image_urls[0] }}" loading="lazy">
+                    src="{{ listing.image_urls[0] }}" loading="lazy"
+                    onerror="this.onerror=null; this.src='{{ url_for('static', filename='img/apple-touch-icon.png') }}';">
                 <div>
                     <div class="fw-semibold">{{ listing.title }}</div>
                     <span class="text-secondary">
