@@ -185,7 +185,7 @@
                 <div class="d-flex align-items-center gap-3">
                 <img class="listing-img"
                     src="{{ listing.image_urls[0] }}" loading="lazy"
-                    onerror="this.onerror=null; this.src='{{ url_for('static', filename='img/apple-touch-icon.png') }}';">
+                    onerror="this.onerror=null; this.src='{{ url_for('static', filename='img/android-chrome-512x512.png') }}';">
                 <div>
                     <div class="fw-semibold">{{ listing.title }}</div>
                     <span class="text-secondary">
@@ -249,7 +249,8 @@
             <td> 
               <div class="d-flex align-items-center gap-3">
                 <img class="listing-img"
-                    src="{{ result.Listing.image_urls[0] }}" loading="lazy">
+                    src="{{ result.Listing.image_urls[0] }}" loading="lazy"
+                    onerror="this.onerror=null; this.src='{{ url_for('static', filename='img/android-chrome-512x512.png') }}';">
                 <div>
               {% if result.Listing.lego_set.name %}
                 {{ result.Listing.lego_set.name }}  
@@ -324,7 +325,8 @@
             <td>
               <div class="d-flex align-items-center gap-3">
                 <img class="listing-img"
-                    src="{{ listing.Listing.image_urls[0] }}" loading="lazy">
+                    src="{{ listing.Listing.image_urls[0] }}" loading="lazy"
+                    onerror="this.onerror=null; this.src='{{ url_for('static', filename='img/android-chrome-512x512.png') }}';">
                 <div>
               {% if listing.Listing.lego_set.name %}
                 {{ listing.Listing.lego_set.name }}  
@@ -383,7 +385,8 @@
             <td>
               <div class="d-flex align-items-center gap-3">
                 {% if row.image_url %}
-                <img class="listing-img" src="{{ row.image_url }}" loading="lazy">
+                <img class="listing-img" src="{{ row.image_url }}" loading="lazy"
+                onerror="this.onerror=null; this.src='{{ url_for('static', filename='img/android-chrome-512x512.png') }}';">
                 {% else %}
                 <img class="listing-img" src="{{ url_for('static', filename='img/android-chrome-512x512.png') }}" loading="lazy"> 
                 {% endif %}
