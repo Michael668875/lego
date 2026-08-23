@@ -7,3 +7,7 @@ instance/
 venv/
 pics/
 *.xml
+logs/
+# Logs
+**/logs/
+
