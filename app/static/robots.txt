@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://brickdrops.app/sitemap.xml
+Sitemap: https://brickdrops.app/static/sitemaps/sitemap.xml

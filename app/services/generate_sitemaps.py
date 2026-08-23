@@ -19,7 +19,7 @@ SITEMAP_DIR.mkdir(parents=True, exist_ok=True)
 SETS_PER_SITEMAP = 10000
 
 # Change this in production
-BASE_URL = "http://127.0.0.1:5000"
+BASE_URL = "https://brickdrops.app"
 
 
 # =========================
