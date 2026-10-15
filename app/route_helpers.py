@@ -198,64 +198,64 @@ def bestdeals_listings(marketplaces):
 
 # price drops logic
 
-def drops_query(marketplaces):
+# def drops_query(marketplaces):
 
-    ranked = (
-        db.session.query(
-            PriceHistory.listing_id.label("listing_id"),
-            PriceHistory.price.label("new_price"),
-            PriceHistory.recorded_at.label("recorded_at"),
+#     ranked = (
+#         db.session.query(
+#             PriceHistory.listing_id.label("listing_id"),
+#             PriceHistory.price.label("new_price"),
+#             PriceHistory.recorded_at.label("recorded_at"),
 
-            Listing.set_num.label("set_num"),
-            Listing.title.label("title"),
-            Listing.ebay_item_id.label("ebay_item_id"),
-            Listing.affiliate_url.label("affiliate_url"),
-            Listing.currency.label("currency"),
+#             Listing.set_num.label("set_num"),
+#             Listing.title.label("title"),
+#             Listing.ebay_item_id.label("ebay_item_id"),
+#             Listing.affiliate_url.label("affiliate_url"),
+#             Listing.currency.label("currency"),
 
-            func.lag(PriceHistory.price).over(
-                partition_by=PriceHistory.listing_id,
-                order_by=(
-                    PriceHistory.recorded_at.asc(),
-                    PriceHistory.id.asc()
-                )
-            ).label("old_price"),
-        )
-        .join(Listing, Listing.id == PriceHistory.listing_id)
-        .filter(
-            Listing.status == "ACTIVE",
-            Listing.marketplace.in_(marketplaces),
-            Listing.set_num.isnot(None),
-        )
-        .subquery()
-    )
+#             func.lag(PriceHistory.price).over(
+#                 partition_by=PriceHistory.listing_id,
+#                 order_by=(
+#                     PriceHistory.recorded_at.asc(),
+#                     PriceHistory.id.asc()
+#                 )
+#             ).label("old_price"),
+#         )
+#         .join(Listing, Listing.id == PriceHistory.listing_id)
+#         .filter(
+#             Listing.status == "ACTIVE",
+#             Listing.marketplace.in_(marketplaces),
+#             Listing.set_num.isnot(None),
+#         )
+#         .subquery()
+#     )
 
-    query = (
-        db.session.query(
-            ranked.c.set_num,
-            ranked.c.title,
-            ranked.c.ebay_item_id,
-            ranked.c.affiliate_url,
-            ranked.c.currency,
-            ranked.c.new_price,
-            ranked.c.old_price,
-            (
-                (ranked.c.old_price - ranked.c.new_price)
-                / ranked.c.old_price * 100
-            ).label("discount_percent"),
-            LegoSet.name.label("canon_name"),
-            LegoSet.img_url.label("image_url"),
-        )
-        .outerjoin(
-            LegoSet,
-            LegoSet.base_set_num == ranked.c.set_num
-        )
-        .filter(
-            ranked.c.old_price.isnot(None),
-            ranked.c.new_price < ranked.c.old_price
-        )
-    )
+#     query = (
+#         db.session.query(
+#             ranked.c.set_num,
+#             ranked.c.title,
+#             ranked.c.ebay_item_id,
+#             ranked.c.affiliate_url,
+#             ranked.c.currency,
+#             ranked.c.new_price,
+#             ranked.c.old_price,
+#             (
+#                 (ranked.c.old_price - ranked.c.new_price)
+#                 / ranked.c.old_price * 100
+#             ).label("discount_percent"),
+#             LegoSet.name.label("canon_name"),
+#             LegoSet.img_url.label("image_url"),
+#         )
+#         .outerjoin(
+#             LegoSet,
+#             LegoSet.base_set_num == ranked.c.set_num
+#         )
+#         .filter(
+#             ranked.c.old_price.isnot(None),
+#             ranked.c.new_price < ranked.c.old_price
+#         )
+#     )
 
-    return query, ranked
+#     return query, ranked
 
 # models logic
 def model_query(marketplaces):

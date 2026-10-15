@@ -363,7 +363,7 @@
             <th class="col-set"> {{ helpers.sort_link('Set', 'set_num', 'discount_percent', 'desc') }} </th>
             <th class="col-title">Title</th>
             <th class="col-price"> {{ helpers.sort_link('Old Price', 'old_price', 'discount_percent', 'desc') }} </th>
-            <th class="col-price"> {{ helpers.sort_link('New Price', 'new_price', 'discount_percent', 'desc') }} </th>
+            <th class="col-price"> {{ helpers.sort_link('New Price', 'price', 'discount_percent', 'desc') }} </th>
             <th class="col-discount"> {{ helpers.sort_link('Discount', 'discount_percent', 'discount_percent', 'desc') }} </th>
             <th class="col-url">Listing</th>
             </tr>
@@ -404,8 +404,8 @@
               {% endif %}
             </td>
             <td>
-              {%  if row.new_price %}
-                {{ helpers.price_display(row.new_price, currency, show_code=False) }}
+              {%  if row.price %}
+                {{ helpers.price_display(row.price, currency, show_code=False) }}
               {% else %}
                 -
               {% endif %}

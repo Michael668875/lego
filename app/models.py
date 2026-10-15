@@ -117,6 +117,25 @@ class PriceHistory(db.Model):
         ),
     )
 
+class PriceDrop(db.Model):
+    id = db.Column(db.BigInteger, primary_key=True)
+    ebay_item_id = db.Column(db.String(255))
+    title = db.Column(db.Text)
+    old_price = db.Column(db.Numeric(10, 2))
+    price = db.Column(db.Numeric(10, 2))
+    currency = db.Column(db.String(10))
+    image_urls = db.Column(db.JSON)
+    condition = db.Column(db.String(255))
+    country = db.Column(db.String(10))
+    status = db.Column(db.String(20))
+    affiliate_url = db.Column(db.Text)
+    last_updated = db.Column(db.DateTime)
+    discount_percent = db.Column(db.Float)
+
+    __tablename__ = "bd_price_drops"
+
+
+
 
 class LegoSet(db.Model):
     __tablename__ = "lego_sets"

@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, g, request, send_from_directory, current_app, make_response
 from datetime import datetime, timezone
 from app.route_helpers import *
-
+from app.models import PriceDrop
 
 bp = Blueprint("main", __name__)
 
@@ -204,18 +204,46 @@ def best_deals(country):
     response.headers["Cache-Control"] = "public, max-age=60"
     return response
 
+# @bp.route("/<country>/drops")
+# def price_drops(country):
+
+#     query, ranked = drops_query(g.marketplaces)
+
+#     query = sort_drops(
+#         query,
+#         request.args.get("sort", "discount_percent"),
+#         request.args.get("direction", "desc"),
+#         ranked.c.set_num,
+#         ranked.c.old_price,
+#         ranked.c.new_price,
+#     )
+
+#     listings = paginate(query)
+
+#     response = make_response(render_template(
+#         "price_drops.html",
+#         listings=listings,
+#         sets=listings.items,
+#     ))
+
+#     response.headers["Cache-Control"] = "public, max-age=60"
+#     return response
+
 @bp.route("/<country>/drops")
 def price_drops(country):
 
-    query, ranked = drops_query(g.marketplaces)
+    query = PriceDrop.query.filter_by(
+        country=country.upper(),
+        status="ACTIVE",
+    )
 
     query = sort_drops(
         query,
         request.args.get("sort", "discount_percent"),
         request.args.get("direction", "desc"),
-        ranked.c.set_num,
-        ranked.c.old_price,
-        ranked.c.new_price,
+        PriceDrop.ebay_item_id,
+        PriceDrop.old_price,
+        PriceDrop.price,
     )
 
     listings = paginate(query)
