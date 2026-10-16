@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, g, request, send_from_directory, current_app, make_response
 from datetime import datetime, timezone
 from app.route_helpers import *
-from app.models import PriceDrop
+from app.models import PriceDrop, OverviewSets, BestDeals, AvailableSets
 
 bp = Blueprint("main", __name__)
 
@@ -158,40 +158,131 @@ def theme_sets(country, theme_id):
     response.headers["Cache-Control"] = "public, max-age=60"
     return response
 
+# @bp.route("/<country>/overview")
+# def overview(country):
+    
+#     query, base_q = db_overview(g.marketplaces)
+
+#     query = sort_overview(
+#         query,
+#         request.args.get("sort", "count"),
+#         request.args.get("direction", "desc"),
+#         base_q.c.count
+#     )
+
+#     listings = paginate(query)
+
+#     response = make_response(render_template(
+#         "overview.html",
+#         listings=listings,
+#         sets = listings.items,
+#     ))
+
+#     response.headers["Cache-Control"] = "public, max-age=60"
+#     return response
+
 @bp.route("/<country>/overview")
 def overview(country):
-    
-    query, base_q = db_overview(g.marketplaces)
 
-    query = sort_overview(
-        query,
-        request.args.get("sort", "count"),
-        request.args.get("direction", "desc"),
-        base_q.c.count
+    country = country.upper()
+
+    query = (
+        db.session.query(
+            Listing,
+            OverviewSets.count.label("count"),
+            OverviewSets.set_num.label("set_num"),
+        )
+        .join(
+            OverviewSets,
+            Listing.id == OverviewSets.cheapest_listing_id
+        )
+        .filter(OverviewSets.country == country)
     )
+
+    sort = request.args.get("sort", "count")
+    direction = request.args.get("direction", "desc")
+
+    sort_columns = {
+        "count": OverviewSets.count,
+        "set_num": OverviewSets.set_num,
+        "price": Listing.price,
+    }
+
+    sort_column = sort_columns.get(sort, OverviewSets.count)
+
+    if direction == "asc":
+        query = query.order_by(sort_column.asc())
+    else:
+        query = query.order_by(sort_column.desc())
 
     listings = paginate(query)
 
-    response = make_response(render_template(
-        "overview.html",
-        listings=listings,
-        sets = listings.items,
-    ))
+    response = make_response(
+        render_template(
+            "overview.html",
+            listings=listings,
+            sets=listings.items,
+        )
+    )
 
     response.headers["Cache-Control"] = "public, max-age=60"
+
     return response
 
-@bp.route("/<country>/best_deals")
-def best_deals(country):        
+# @bp.route("/<country>/best_deals")
+# def best_deals(country):        
 
-    query, discount_expr = bestdeals_listings(g.marketplaces)
+#     query, discount_expr = bestdeals_listings(g.marketplaces)
     
-    query = sort_deals(
-        query,
-        request.args.get("sort", "discount"),
-        request.args.get("direction", "desc"),
-        discount_expr
+#     query = sort_deals(
+#         query,
+#         request.args.get("sort", "discount"),
+#         request.args.get("direction", "desc"),
+#         discount_expr
+#     )
+
+#     listings = paginate(query)
+
+#     response = make_response(render_template(
+#         "best_deals.html",
+#         listings=listings,
+#         sets=listings.items,
+#     ))
+
+#     response.headers["Cache-Control"] = "public, max-age=60"
+#     return response
+
+@bp.route("/<country>/best_deals")
+def best_deals(country):
+    country = country.upper()
+
+    query = (
+        db.session.query(
+            Listing,
+            BestDeals.avg_price.label("avg_price"),
+            BestDeals.discount.label("discount"),
+        )
+        .join(
+            BestDeals,
+            Listing.id == BestDeals.listing_id
+        )
+        .filter(BestDeals.country == country)
     )
+
+    sort_columns = {
+        "discount": BestDeals.discount,
+        "price": Listing.price,
+        "set_num": BestDeals.set_num,
+    }
+
+    sort = request.args.get("sort", "discount")
+    direction = request.args.get("direction", "desc")
+    sort_column = sort_columns.get(sort, BestDeals.discount)
+
+    if direction == "asc":
+        query = query.order_by(sort_column.asc())
+    else:
+        query = query.order_by(sort_column.desc())
 
     listings = paginate(query)
 
@@ -257,10 +348,29 @@ def price_drops(country):
     response.headers["Cache-Control"] = "public, max-age=60"
     return response
 
+# @bp.route("/<country>/models")
+# def models(country):
+
+#     rows = model_query(g.marketplaces)
+
+#     themes = theme_query(rows)
+
+#     response = make_response(render_template(
+#         "models.html",
+#         themes=themes,
+#     ))
+
+#     response.headers["Cache-Control"] = "public, max-age=60"
+#     return response
+
 @bp.route("/<country>/models")
 def models(country):
 
-    rows = model_query(g.marketplaces)
+    rows = AvailableSets.query.filter_by(
+        country=country.upper(),
+    ).order_by(
+        AvailableSets.count.desc()
+    ).all()
 
     themes = theme_query(rows)
 

@@ -9,10 +9,11 @@ Track LEGO prices, deals, and listings across marketplaces.
 
 {% block content %}
 
-            {{ macro.hero() }}
+            {% if not listings.page or listings.page == 1 %}
+                {{ macro.hero() }}       
 
-            {{ macro.specials(active_listings, top_theme, top_theme_id, best_deals_count) }}
-
+                {{ macro.specials(active_listings, top_theme, top_theme_id, best_deals_count) }}
+            {% endif %}
             
 
             <div class="d-none d-md-block">

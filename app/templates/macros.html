@@ -37,12 +37,12 @@
             <div class="ms-3">{{ country_select(country, country_flags) }}</div>
             <div class="ms-3">{{ search_bar() }}</div>
 
-            <div class="ms-auto">
-              <a class="menu-link btn btn-light mx-0" href="{{ url_for('main.listings', country=country) }}">Home</a>
-              <a class="menu-link btn btn-light mx-0" href="{{ url_for('main.overview', country=country) }}">Overview</a>
-              <a class="menu-link btn btn-light mx-0" href="{{ url_for('main.best_deals', country=country) }}">Best Deals</a>
-              <a class="menu-link btn btn-light mx-0" href="{{ url_for('main.price_drops', country=country) }}">Price Drops</a>
-              <a class="menu-link btn btn-light mx-0" href="{{ url_for('main.models', country=country) }}">Available Sets</a>
+            <div class="ms-3">
+              <a class="menu-link btn btn-light mx-0 my-1" href="{{ url_for('main.listings', country=country) }}">Home</a>
+              <a class="menu-link btn btn-light mx-0 my-1" href="{{ url_for('main.overview', country=country) }}">Overview</a>
+              <a class="menu-link btn btn-light mx-0 my-1" href="{{ url_for('main.best_deals', country=country) }}">Best Deals</a>
+              <a class="menu-link btn btn-light mx-0 my-1" href="{{ url_for('main.price_drops', country=country) }}">Price Drops</a>
+              <a class="menu-link btn btn-light mx-0 my-1" href="{{ url_for('main.models', country=country) }}">Available Sets</a>
             </div>
           </div>
         </nav>

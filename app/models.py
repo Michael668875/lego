@@ -196,3 +196,41 @@ class SetPriceStats(db.Model):
     updated_at = db.Column(db.DateTime(timezone=True))
 
     lego_set = db.relationship("LegoSet", backref="listings")
+
+class OverviewSets(db.Model):
+    __tablename__ = "bd_overview_sets"
+
+    set_num = db.Column(db.String, primary_key=True)
+    country = db.Column(db.String, primary_key=True)
+    count = db.Column(db.Integer)
+    cheapest_listing_id = db.Column(
+        db.Integer,
+        db.ForeignKey("listings.id")
+    )
+    cheapest_price = db.Column(db.Numeric)
+
+class BestDeals(db.Model):
+    __tablename__ = "bd_best_deals"
+
+    listing_id = db.Column(
+        db.Integer,
+        db.ForeignKey("listings.id"),
+        primary_key=True
+    )
+    set_num = db.Column(db.String)
+    country = db.Column(db.String)
+    currency = db.Column(db.String)
+    price = db.Column(db.Numeric(10, 2))
+    avg_price = db.Column(db.Numeric(10, 2))
+    discount = db.Column(db.Numeric(10, 4))
+
+class AvailableSets(db.Model):
+    __tablename__ = "bd_available_sets"
+
+    set_num = db.Column(db.String, primary_key=True)
+    country = db.Column(db.String, primary_key=True)
+    name = db.Column(db.String)
+    theme_id = db.Column(db.Integer)
+    theme_name = db.Column(db.String)
+    count = db.Column(db.Integer)
+    last_seen = db.Column(db.DateTime(timezone=True))
