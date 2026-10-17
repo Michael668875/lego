@@ -9,7 +9,7 @@
       <div class="dropdown">
         <button class="btn btn-sm dropdown-toggle country-btn" type="button" id="countryDropdown"
                 data-bs-toggle="dropdown" aria-expanded="false">
-          {{ country_flags.get(nav_country) }}
+          {{ country_flags.get(nav_country|lower, '') }}
           {{ nav_country.upper() }}
         </button>
 
@@ -128,7 +128,7 @@
     <div class="stat-card shadow-sm p-4">
       <div class="text-secondary mb-2">Top Theme</div>
       <div class="display-6 fw-bold text-truncate fit-text">
-        {{ top_theme }}
+        {{ top_theme if top_theme else "-" }}
       </div>
     </div>
     {%  if top_theme_id %}
@@ -391,7 +391,7 @@
                 <img class="listing-img" src="{{ url_for('static', filename='img/android-chrome-512x512.png') }}" loading="lazy"> 
                 {% endif %}
                 <div>
-                  {{ row.canon_name or "-" }}
+                  {{ row.canon_name or row.title or "-" }}
                 </div>
               </div>
             </td>

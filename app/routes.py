@@ -43,33 +43,56 @@ def timeago(dt):
         return dt.strftime("%d %b %Y")
     
 
-DEFAULT_COUNTRY = "us"    
+# DEFAULT_COUNTRY = "us"    
+
+# @bp.before_app_request
+# def load_country_context():
+
+#     country = None
+
+#     # 1. route-based country (if exists)
+#     if request.view_args:
+#         country = request.view_args.get("country")
+
+#     # 2. cookie fallback
+#     if not country:
+#         country = request.cookies.get("country")
+
+#     # 3. default fallback
+#     country = (country or DEFAULT_COUNTRY).lower()
+
+#     markets = get_enabled_markets()
+
+#     # 4. safety fallback (DO NOT abort globally)
+#     if country not in CURRENCY_BY_COUNTRY:
+#         country = DEFAULT_COUNTRY
+
+#     g.country = country.upper()
+#     g.currency = CURRENCY_BY_COUNTRY.get(g.country, "USD")  
+
+DEFAULT_COUNTRY = "us"
 
 @bp.before_app_request
 def load_country_context():
-
     country = None
 
-    # 1. route-based country (if exists)
+    # 1. Country from the route
     if request.view_args:
         country = request.view_args.get("country")
 
-    # 2. cookie fallback
+    # 2. Cookie fallback
     if not country:
         country = request.cookies.get("country")
 
-    # 3. default fallback
+    # 3. Default fallback
     country = (country or DEFAULT_COUNTRY).lower()
 
-    markets = get_enabled_markets()
-
-    # 4. safety fallback (DO NOT abort globally)
-    if country not in markets:
+    # 4. Validate country
+    if country not in CURRENCY_BY_COUNTRY:
         country = DEFAULT_COUNTRY
 
-    g.country = country
-    g.marketplaces = [markets[country]]
-    g.currency = CURRENCY_BY_COUNTRY.get(country, "USD")    
+    g.country = country.upper()
+    g.currency = CURRENCY_BY_COUNTRY.get(country, "USD")
 
 
 @bp.app_context_processor
@@ -82,22 +105,31 @@ def inject_site_globals():
 
 
 
+# @bp.route("/")
+# def index():
+#     preferred = request.cookies.get("country")
+#     valid_countries = set(get_enabled_markets().keys())
+
+#     if preferred:
+#         preferred = preferred.lower()
+#         if preferred in valid_countries:
+#            return redirect(url_for("main.listings", country=preferred))
+
+#     return redirect(url_for("main.listings", country="us"))
+
 @bp.route("/")
 def index():
-    preferred = request.cookies.get("country")
-    valid_countries = set(get_enabled_markets().keys())
+    preferred = (request.cookies.get("country") or "").lower()
 
-    if preferred:
-        preferred = preferred.lower()
-        if preferred in valid_countries:
-           return redirect(url_for("main.listings", country=preferred))
+    if preferred in CURRENCY_BY_COUNTRY:
+        return redirect(url_for("main.listings", country=preferred))
 
-    return redirect(url_for("main.listings", country="us"))
+    return redirect(url_for("main.listings", country=DEFAULT_COUNTRY))
 
 @bp.route("/<country>/")
 def listings(country):    
 
-    query = db_query(g.marketplaces)
+    query = db_query(g.country)
 
     query = sort_listings(
         query,
@@ -107,7 +139,7 @@ def listings(country):
 
     listings = paginate(query)
 
-    stats = homepage_stats(g.marketplaces)
+    stats = homepage_stats(g.country)
 
     response = make_response(render_template(
         "listings.html",
@@ -125,7 +157,7 @@ def listings(country):
 @bp.route("/<country>/<set_num>")
 def set_list(country, set_num):
 
-    listings = db_query(g.marketplaces, set_num)
+    listings = db_query(g.country, set_num)
 
     listings = sort_listings(
             listings,
@@ -147,7 +179,7 @@ def theme_sets(country, theme_id):
 
     theme = Theme.query.get_or_404(theme_id)
 
-    sets = get_sets(theme_id, g.marketplaces)
+    sets = get_sets(theme_id, g.country)
     
     response = make_response(render_template(
         "theme_sets.html",
@@ -157,29 +189,6 @@ def theme_sets(country, theme_id):
 
     response.headers["Cache-Control"] = "public, max-age=60"
     return response
-
-# @bp.route("/<country>/overview")
-# def overview(country):
-    
-#     query, base_q = db_overview(g.marketplaces)
-
-#     query = sort_overview(
-#         query,
-#         request.args.get("sort", "count"),
-#         request.args.get("direction", "desc"),
-#         base_q.c.count
-#     )
-
-#     listings = paginate(query)
-
-#     response = make_response(render_template(
-#         "overview.html",
-#         listings=listings,
-#         sets = listings.items,
-#     ))
-
-#     response.headers["Cache-Control"] = "public, max-age=60"
-#     return response
 
 @bp.route("/<country>/overview")
 def overview(country):
@@ -229,29 +238,6 @@ def overview(country):
 
     return response
 
-# @bp.route("/<country>/best_deals")
-# def best_deals(country):        
-
-#     query, discount_expr = bestdeals_listings(g.marketplaces)
-    
-#     query = sort_deals(
-#         query,
-#         request.args.get("sort", "discount"),
-#         request.args.get("direction", "desc"),
-#         discount_expr
-#     )
-
-#     listings = paginate(query)
-
-#     response = make_response(render_template(
-#         "best_deals.html",
-#         listings=listings,
-#         sets=listings.items,
-#     ))
-
-#     response.headers["Cache-Control"] = "public, max-age=60"
-#     return response
-
 @bp.route("/<country>/best_deals")
 def best_deals(country):
     country = country.upper()
@@ -295,31 +281,6 @@ def best_deals(country):
     response.headers["Cache-Control"] = "public, max-age=60"
     return response
 
-# @bp.route("/<country>/drops")
-# def price_drops(country):
-
-#     query, ranked = drops_query(g.marketplaces)
-
-#     query = sort_drops(
-#         query,
-#         request.args.get("sort", "discount_percent"),
-#         request.args.get("direction", "desc"),
-#         ranked.c.set_num,
-#         ranked.c.old_price,
-#         ranked.c.new_price,
-#     )
-
-#     listings = paginate(query)
-
-#     response = make_response(render_template(
-#         "price_drops.html",
-#         listings=listings,
-#         sets=listings.items,
-#     ))
-
-#     response.headers["Cache-Control"] = "public, max-age=60"
-#     return response
-
 @bp.route("/<country>/drops")
 def price_drops(country):
 
@@ -347,21 +308,6 @@ def price_drops(country):
 
     response.headers["Cache-Control"] = "public, max-age=60"
     return response
-
-# @bp.route("/<country>/models")
-# def models(country):
-
-#     rows = model_query(g.marketplaces)
-
-#     themes = theme_query(rows)
-
-#     response = make_response(render_template(
-#         "models.html",
-#         themes=themes,
-#     ))
-
-#     response.headers["Cache-Control"] = "public, max-age=60"
-#     return response
 
 @bp.route("/<country>/models")
 def models(country):

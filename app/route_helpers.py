@@ -1,6 +1,6 @@
 from flask import abort, request, render_template, url_for, g
 from sqlalchemy import func, exists, case, desc
-from app.models import Listing, PriceHistory, LegoSet, Theme
+from app.models import Listing, PriceHistory, LegoSet, Theme, BestDeals, TopTheme
 from app.extensions import db
 from collections import defaultdict
 from functools import wraps
@@ -29,14 +29,10 @@ def get_enabled_markets():
     """Return enabled marketplaces as dict keyed by country code."""
     return {m.split("_")[1].lower(): m for m in ENABLED_MARKETS}
 
-
-def db_query(marketplaces, set_num=None):
-    query = (
-        Listing.query
-        .filter(
-            Listing.status == "ACTIVE",
-            Listing.marketplace.in_(marketplaces),
-        )
+def db_query(country, set_num=None):
+    query = Listing.query.filter(
+        Listing.status == "ACTIVE",
+        Listing.country == country.upper(),
     )
 
     if set_num:
@@ -45,244 +41,34 @@ def db_query(marketplaces, set_num=None):
     return query
 
 # stats for homepage
-def homepage_stats(marketplaces):
+def homepage_stats(country):
 
     # Active listings
     active_listings = (
         Listing.query
         .filter(
             Listing.status == "ACTIVE",
-            Listing.marketplace.in_(marketplaces)
+            Listing.country == country.upper()
         )
         .count()
     )
 
     # Top theme
-    top_theme = (
-        db.session.query(
-            Theme.id,
-            Theme.name,
-            func.count(Listing.id).label("listing_count")
-        )
-        .join(LegoSet, LegoSet.theme_id == Theme.id)
-        .join(
-            Listing,
-            Listing.set_num == LegoSet.base_set_num
-        )
-        .filter(
-            Listing.status == "ACTIVE",
-            Listing.marketplace.in_(marketplaces)
-        )
-        .group_by(Theme.id, Theme.name)
-        .order_by(func.count(Listing.id).desc())
-        .first()
-    )
+    top_theme = TopTheme.query.filter_by(
+        country=country.upper()
+    ).first()
 
     # Best deals available
-    avg_subquery = (
-        db.session.query(
-            Listing.set_num.label("set_num"),
-            func.avg(Listing.price).label("avg_price")
-        )
-        .filter(
-            Listing.marketplace.in_(marketplaces),
-            Listing.status == "ACTIVE",
-            Listing.set_num.isnot(None)
-        )
-        .group_by(Listing.set_num)
-        .subquery()
-    )
-
-    best_deals_count = (
-        db.session.query(Listing.id)
-        .join(
-            avg_subquery,
-            Listing.set_num == avg_subquery.c.set_num
-        )
-        .filter(
-            Listing.marketplace.in_(marketplaces),
-            Listing.status == "ACTIVE",
-            Listing.price <= avg_subquery.c.avg_price * 0.75
-        )
-        .count()
-    )
+    best_deals_count = BestDeals.query.filter_by(
+        country=country.upper(),
+    ).count()
 
     return {
         "active_listings": active_listings,
-        "top_theme": top_theme.name if top_theme else "N/A",
-        "top_theme_id": top_theme.id if top_theme else None,
+        "top_theme": top_theme.theme_name if top_theme else "N/A",
+        "top_theme_id": top_theme.theme_id if top_theme else None,
         "best_deals_count": best_deals_count
     }
-   
-#overview logic
-# def db_overview(marketplaces):
-
-#     country = g.country.upper()
-
-#     base_q = (
-#         db.session.query(
-#             Listing.set_num.label("set_num"),
-#             func.count(Listing.id).label("count")
-#         )
-#         .filter(Listing.marketplace.in_(marketplaces))
-#         .filter(Listing.set_num.isnot(None))
-#         .filter(Listing.status == "ACTIVE")
-#         .filter(Listing.country == country)
-#         .group_by(Listing.set_num)
-#         .subquery()
-#     )
-
-#     cheapest_listing_subq = (
-#         db.session.query(Listing.id)
-#         .filter(Listing.set_num == base_q.c.set_num)
-#         .filter(Listing.marketplace.in_(marketplaces))
-#         .order_by(Listing.price.asc())
-#         .limit(1)
-#         .correlate(base_q)
-#         .scalar_subquery()
-#     )
-
-#     query = (
-#         db.session.query(
-#             base_q.c.set_num,
-#             base_q.c.count,
-#             Listing
-#         )
-#         .join(Listing, Listing.id == cheapest_listing_subq)
-#     )
-
-#     return query, base_q
-
-
-# best deals logic
-# def db_bestdeals(marketplaces):
-#     return (
-#         db.session.query(
-#             Listing.set_num.label("set_num"),
-#             func.avg(Listing.price).label("avg_price")
-#         )
-#         .filter(Listing.marketplace.in_(marketplaces))
-#         .filter(Listing.set_num.isnot(None))
-#         .filter(Listing.price.isnot(None))
-#         .filter(Listing.status == "ACTIVE")
-#         .group_by(Listing.set_num)
-#         .subquery()
-#     )
-
-# Listings 25%+ below average
-# def bestdeals_listings(marketplaces):
-#     avg_subquery = db_bestdeals(marketplaces)
-
-#     discount_expr = (
-#         (avg_subquery.c.avg_price - Listing.price)
-#         / avg_subquery.c.avg_price
-#     ).label("discount")
-
-#     query = (
-#         db.session.query(
-#             Listing,
-#             avg_subquery.c.avg_price.label("avg_price"),
-#             discount_expr
-#         )
-#         .join(
-#             avg_subquery,
-#             Listing.set_num == avg_subquery.c.set_num
-#         )
-#         .filter(Listing.marketplace.in_(marketplaces))
-#         .filter(Listing.status == "ACTIVE")
-#         .filter(Listing.price <= avg_subquery.c.avg_price * 0.75)
-#     )
-
-#     return query, discount_expr
-
-
-# price drops logic
-
-# def drops_query(marketplaces):
-
-#     ranked = (
-#         db.session.query(
-#             PriceHistory.listing_id.label("listing_id"),
-#             PriceHistory.price.label("new_price"),
-#             PriceHistory.recorded_at.label("recorded_at"),
-
-#             Listing.set_num.label("set_num"),
-#             Listing.title.label("title"),
-#             Listing.ebay_item_id.label("ebay_item_id"),
-#             Listing.affiliate_url.label("affiliate_url"),
-#             Listing.currency.label("currency"),
-
-#             func.lag(PriceHistory.price).over(
-#                 partition_by=PriceHistory.listing_id,
-#                 order_by=(
-#                     PriceHistory.recorded_at.asc(),
-#                     PriceHistory.id.asc()
-#                 )
-#             ).label("old_price"),
-#         )
-#         .join(Listing, Listing.id == PriceHistory.listing_id)
-#         .filter(
-#             Listing.status == "ACTIVE",
-#             Listing.marketplace.in_(marketplaces),
-#             Listing.set_num.isnot(None),
-#         )
-#         .subquery()
-#     )
-
-#     query = (
-#         db.session.query(
-#             ranked.c.set_num,
-#             ranked.c.title,
-#             ranked.c.ebay_item_id,
-#             ranked.c.affiliate_url,
-#             ranked.c.currency,
-#             ranked.c.new_price,
-#             ranked.c.old_price,
-#             (
-#                 (ranked.c.old_price - ranked.c.new_price)
-#                 / ranked.c.old_price * 100
-#             ).label("discount_percent"),
-#             LegoSet.name.label("canon_name"),
-#             LegoSet.img_url.label("image_url"),
-#         )
-#         .outerjoin(
-#             LegoSet,
-#             LegoSet.base_set_num == ranked.c.set_num
-#         )
-#         .filter(
-#             ranked.c.old_price.isnot(None),
-#             ranked.c.new_price < ranked.c.old_price
-#         )
-#     )
-
-#     return query, ranked
-
-# models logic
-# def model_query(marketplaces):
-#     return (
-#         db.session.query(
-#             Listing.set_num,
-#             LegoSet.name.label("name"),
-#             LegoSet.theme_id.label("theme_id"),
-#             Theme.name.label("theme_name"),
-#             func.count(Listing.id).label("count"),
-#             func.max(Listing.last_seen).label("last_seen"),
-#         )
-#         .join(LegoSet, Listing.set_num == LegoSet.base_set_num)
-#         .join(Theme, LegoSet.theme_id == Theme.id)
-#         .filter(
-#             Listing.status == "ACTIVE",
-#             Listing.marketplace.in_(marketplaces)
-#         )
-#         .group_by(
-#             Listing.set_num,
-#             LegoSet.name,
-#             LegoSet.theme_id,
-#             Theme.name,           
-#         )
-#         .order_by(func.count(Listing.id).desc())
-#         .all()
-#     )
 
 def theme_query(rows):
 
@@ -370,9 +156,7 @@ class PaginationWrapper:
             right_edge=right_edge
         )
 
-
-
-def get_sets(theme_id, marketplaces):
+def get_sets(theme_id, country):
     return (
         db.session.query(LegoSet)
         .join(
@@ -382,13 +166,12 @@ def get_sets(theme_id, marketplaces):
         .filter(
             LegoSet.theme_id == theme_id,
             Listing.status == "ACTIVE",
-            Listing.marketplace.in_(marketplaces),
+            Listing.country == country.upper(),
         )
         .distinct()
         .order_by(LegoSet.year.desc())
         .all()
     )
-
 
 def get_set_data(base_set, country):
 

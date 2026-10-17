@@ -120,11 +120,13 @@ class PriceHistory(db.Model):
 class PriceDrop(db.Model):
     id = db.Column(db.BigInteger, primary_key=True)
     ebay_item_id = db.Column(db.String(255))
+    set_num = db.Column(db.Integer)
+    canon_name = db.Column(db.String)
     title = db.Column(db.Text)
     old_price = db.Column(db.Numeric(10, 2))
     price = db.Column(db.Numeric(10, 2))
     currency = db.Column(db.String(10))
-    image_urls = db.Column(db.JSON)
+    image_url = db.Column(db.Text)
     condition = db.Column(db.String(255))
     country = db.Column(db.String(10))
     status = db.Column(db.String(20))
@@ -234,3 +236,11 @@ class AvailableSets(db.Model):
     theme_name = db.Column(db.String)
     count = db.Column(db.Integer)
     last_seen = db.Column(db.DateTime(timezone=True))
+
+class TopTheme(db.Model):
+    __tablename__ = "bd_top_theme"
+
+    theme_id = db.Column(db.Integer, primary_key=True)
+    theme_name = db.Column(db.String)
+    country = db.Column(db.String, primary_key=True)
+    listing_count = db.Column(db.Integer)
