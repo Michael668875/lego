@@ -58,6 +58,8 @@ def homepage_stats(country):
         country=country.upper()
     ).first()
 
+
+
     # Best deals available
     best_deals_count = BestDeals.query.filter_by(
         country=country.upper(),
