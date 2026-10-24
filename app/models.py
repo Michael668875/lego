@@ -118,9 +118,14 @@ class PriceHistory(db.Model):
     )
 
 class PriceDrop(db.Model):
-    id = db.Column(db.BigInteger, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
+    listing_id = db.Column(
+        db.Integer,
+        db.ForeignKey("listings.id"),
+        nullable=False
+    )
     ebay_item_id = db.Column(db.String(255))
-    set_num = db.Column(db.Integer)
+    set_num = db.Column(db.String(32))
     canon_name = db.Column(db.String)
     title = db.Column(db.Text)
     old_price = db.Column(db.Numeric(10, 2))
