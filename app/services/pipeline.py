@@ -154,11 +154,6 @@ def find_set_number(title, valid_set_nums):
     if not title:
         return None
 
-    for num in valid_set_nums:
-        if num in title:
-            if re.search(rf"(?<!\d){re.escape(num)}(?!\d)", title):
-                return num
-
     patterns = [
         r"\b(\d{5,6})-\d+\b",
         r"\bSet\s*#?\s*(\d{5,6})\b",
@@ -167,20 +162,21 @@ def find_set_number(title, valid_set_nums):
     ]
 
     for pattern in patterns:
-        match = re.search(pattern, title, re.IGNORECASE)
-        if match:
-            return match.group(1)
+        for match in re.finditer(pattern, title, re.IGNORECASE):
+            num = match.group(1)
+            if num in valid_set_nums:
+                return num
 
     return None
 
 def get_set_nums():
-    all_set_nums = sorted({
+    all_set_nums = {
         str(s).strip()
         for (s,) in LegoSet.query.with_entities(
             LegoSet.base_set_num
         ).all()
         if s and str(s).isdigit() and len(str(s)) >= 4
-    }, key=len, reverse=True)
+    }
 
     # Load all temporary summaries into a dictionary once
     temp_titles = dict(
