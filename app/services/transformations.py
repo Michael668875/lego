@@ -66,6 +66,82 @@ def create_overview():
     print("OverviewSets created.")
 
 
+def create_best_deals():
+    db.session.execute(text("TRUNCATE TABLE bd_best_deals"))
+
+    db.session.execute(text("""
+        INSERT INTO bd_best_deals (
+            listing_id,
+            set_num,
+            country,
+            currency,
+            price,
+            avg_price,
+            discount
+        )
+        WITH active_listings AS (
+            SELECT
+                id AS listing_id,
+                set_num,
+                country,
+                currency,
+                price
+            FROM listings
+            WHERE 
+                set_num IS NOT NULL
+                AND status = 'ACTIVE'
+        ),
+        overview AS (
+            SELECT
+                set_num,
+                country,
+                AVG(price) AS avg_price,
+                COUNT(*) AS listing_count
+            FROM active_listings
+            GROUP BY
+                set_num,
+                country
+        ),
+        ranked_listings AS (
+            SELECT
+                listing_id,
+                set_num,
+                country,
+                currency,
+                price,
+                ROW_NUMBER() OVER(
+                    PARTITION BY set_num, country
+                    ORDER BY price ASC NULLS LAST, listing_id ASC
+                ) AS price_rank
+            FROM active_listings
+            WHERE price IS NOT NULL
+        )
+        SELECT
+            r.listing_id,
+            r.set_num,
+            r.country,
+            r.currency,
+            r.price,
+            o.avg_price,
+            CASE
+                WHEN o.avg_price > 0 THEN
+                    ROUND(
+                        ((o.avg_price - r.price) / o.avg_price) * 100,
+                        2
+                    )
+                ELSE 0
+            END AS discount
+        FROM overview o
+        JOIN ranked_listings r
+            ON r.set_num = o.set_num
+            AND r.country = o.country
+            AND r.price_rank = 1
+    """))
+    db.session.commit()
+    print("best deals created.")
+
+
+
 def create_price_drops():
     db.session.execute(text("TRUNCATE TABLE bd_price_drops"))
 
@@ -180,6 +256,7 @@ def create_top_theme():
 
 if __name__ == "__main__":
     with app.app_context():
-        create_overview()
-        create_top_theme()
-        create_price_drops()
+    #    create_overview()
+    #    create_top_theme()
+    #    create_price_drops()
+        create_best_deals()
