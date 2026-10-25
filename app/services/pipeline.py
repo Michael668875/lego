@@ -174,32 +174,47 @@ def find_set_number(title, valid_set_nums):
     return None
 
 def get_set_nums():
-    """
-    Updates Listing.set_num using matching TempSummaries titles.
-    """
-
     all_set_nums = sorted({
-        str(s.base_set_num).strip()
-        for s in LegoSet.query.with_entities(LegoSet.base_set_num).all()
-        if s.base_set_num
-        and str(s.base_set_num).isdigit()
-        and len(str(s.base_set_num)) >= 4
+        str(s).strip()
+        for (s,) in LegoSet.query.with_entities(
+            LegoSet.base_set_num
+        ).all()
+        if s and str(s).isdigit() and len(str(s)) >= 4
     }, key=len, reverse=True)
 
-    listings = Listing.query.all()
+    # Load all temporary summaries into a dictionary once
+    temp_titles = dict(
+        db.session.query(
+            TempSummaries.ebay_item_id,
+            TempSummaries.title
+        ).all()
+    )
 
-    for listing in listings:
-        temp = TempSummaries.query.filter_by(
-            ebay_item_id=listing.ebay_item_id
-        ).first()
+    listings = Listing.query.with_entities(
+        Listing.id,
+        Listing.ebay_item_id
+    ).all()
 
-        if not temp:
+    updated = 0
+
+    for listing_id, ebay_item_id in listings:
+        title = temp_titles.get(ebay_item_id)
+        if not title:
             continue
 
-        set_num = find_set_number(temp.title, all_set_nums)
+        set_num = find_set_number(title, all_set_nums)
 
         if set_num:
-            listing.set_num = str(set_num)
+            db.session.query(Listing).filter_by(
+                id=listing_id
+            ).update(
+                {Listing.set_num: str(set_num)},
+                synchronize_session=False
+            )
+            updated += 1
+
+    db.session.commit()
+    print(f"Updated set numbers for {updated} listings.", flush=True)
 
 # delete temp data
 def truncate_temp_tables():
