@@ -4,8 +4,8 @@ import sys
 from app import create_app
 from app.services.save_temp import save_temp_summaries
 from app.services.pipeline import run_pipeline, truncate_temp_tables
+from app.services.transformations import transform
 from app.services.fetch import get_paginated_summaries
-#from app.services.parse import blacklist
 from datetime import datetime
 import traceback
 import tempfile
@@ -52,6 +52,8 @@ def main():
             print(f"Fetched and saved {len(items)} summaries")     
 
             run_pipeline()
+
+            transform()
 
     except Exception:
         print("Error occurred in main_fetch.py:")

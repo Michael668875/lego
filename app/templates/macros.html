@@ -40,7 +40,7 @@
             <div class="ms-3">
               <a class="menu-link btn btn-light mx-0 my-1" href="{{ url_for('main.listings', country=country) }}">Home</a>
               <a class="menu-link btn btn-light mx-0 my-1" href="{{ url_for('main.overview', country=country) }}">Overview</a>
-              <a class="menu-link btn btn-light mx-0 my-1" href="{{ url_for('main.best_deals', country=country) }}">Best Deals</a>
+              <a class="menu-link btn btn-light mx-0 my-1" href="{{ url_for('main.best_deals', country=country) }}">Deals</a>
               <a class="menu-link btn btn-light mx-0 my-1" href="{{ url_for('main.price_drops', country=country) }}">Price Drops</a>
               <a class="menu-link btn btn-light mx-0 my-1" href="{{ url_for('main.models', country=country) }}">Available Sets</a>
             </div>
@@ -139,7 +139,7 @@
   <div class="col-md-4">
     <a class="specials" href="{{ url_for('main.best_deals', country=g.country) }}">
     <div class="stat-card shadow-sm p-4">
-      <div class="text-secondary mb-2">Best Deals Available</div>
+      <div class="text-secondary mb-2">Deals Available</div>
       <div class="display-6 fw-bold">
         {{ "{:,}".format(best_deals_count) }}
       </div>
@@ -283,7 +283,7 @@
 
 {% macro best_deals_table(listings, currency) %}
 <div class="table-wrap rounded-4 shadow-sm p-4">
-    <h3 class="mb-4">Best Deals</h3>
+    <h3 class="mb-4">Deals</h3>
     <p>Find LEGO sets currently selling below their average market price based on tracked listings.</p>
     <div class="table-responsive">
         <table class="table align-middle">
