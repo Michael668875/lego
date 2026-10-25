@@ -151,30 +151,19 @@ def insert_price_history():
     print("History rows inserted:", result.rowcount)
     
 def find_set_number(title, valid_set_nums):
-    """
-    Extracts LEGO set numbers like:
-    75313
-    75313-1
-    (75313)
-    Set 75313
-
-    Returns the numeric part as int, or None.
-    """
-
     if not title:
         return None
-    
-    for num in sorted(valid_set_nums, key=len, reverse=True):
+
+    for num in valid_set_nums:
         if num in title:
-            # extra safety check: ensure it's not part of a larger digit sequence
             if re.search(rf"(?<!\d){re.escape(num)}(?!\d)", title):
                 return num
 
     patterns = [
-        r"\b(\d{5,6})-\d+\b",        # 75313-1 (most reliable)
-        r"\bSet\s*#?\s*(\d{5,6})\b", # Set 75313 / Set #75313
-        r"\((\d{5,6})\)",            # (75313)
-        r"\b(\d{5,6})\b",            # fallback ONLY
+        r"\b(\d{5,6})-\d+\b",
+        r"\bSet\s*#?\s*(\d{5,6})\b",
+        r"\((\d{5,6})\)",
+        r"\b(\d{5,6})\b",
     ]
 
     for pattern in patterns:
@@ -184,19 +173,18 @@ def find_set_number(title, valid_set_nums):
 
     return None
 
-
 def get_set_nums():
     """
     Updates Listing.set_num using matching TempSummaries titles.
     """
 
-    all_set_nums = {
+    all_set_nums = sorted({
         str(s.base_set_num).strip()
         for s in LegoSet.query.with_entities(LegoSet.base_set_num).all()
         if s.base_set_num
         and str(s.base_set_num).isdigit()
         and len(str(s.base_set_num)) >= 4
-    }
+    }, key=len, reverse=True)
 
     listings = Listing.query.all()
 
@@ -222,19 +210,56 @@ def truncate_temp_tables():
         TRUNCATE temp_summaries;
     """))
 
+def run_pipeline():
+    import time
+
+    steps = [
+        ("Insert listings", insert_listings),
+        ("Match set numbers", get_set_nums),
+        ("Update listing prices", update_listing_prices),
+        ("Insert price history", insert_price_history),
+        ("Update seen listings", update_seen_listings),
+        ("Mark sold listings", mark_sold_listings),
+        ("Increment miss counts", increment_miss_count),
+        ("Mark ended listings", mark_ended_listings),
+    ]
+
+    try:
+        for name, func in steps:
+            start = time.perf_counter()
+            print(f"Starting: {name}", flush=True)
+
+            func()
+
+            print(
+                f"Finished: {name} ({time.perf_counter() - start:.1f}s)",
+                flush=True
+            )
+
+        start = time.perf_counter()
+        db.session.commit()
+        print(
+            f"Database commit finished "
+            f"({time.perf_counter() - start:.1f}s)",
+            flush=True
+        )
+
+    except Exception:
+        db.session.rollback()
+        raise
     
 
-def run_pipeline():
-    insert_listings()
-    get_set_nums()
-    update_listing_prices()
-    insert_price_history()
-    update_seen_listings()
-    mark_sold_listings()
-    increment_miss_count()
-    mark_ended_listings()
-
-    db.session.commit()
+#def run_pipeline():
+#    insert_listings()
+#    get_set_nums()
+#    update_listing_prices()
+#    insert_price_history()
+#    update_seen_listings()
+#    mark_sold_listings()
+#    increment_miss_count()
+#    mark_ended_listings()
+#
+#    db.session.commit()
 
 #with app.app_context():
 #    run_pipeline()
